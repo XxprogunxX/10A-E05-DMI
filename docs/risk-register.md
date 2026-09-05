@@ -1,14 +1,16 @@
 # Registro de riesgos — CampusOps
 
-> Registren exactamente tres riesgos y ordénenlos del más al menos prioritario.
-
 | Prioridad | Riesgo | Probabilidad | Impacto | Mitigación | Cómo comprobar la mitigación |
 |---:|---|---|---|---|---|
-| 1 | [riesgo] | [baja/media/alta y motivo] | [bajo/medio/alto y motivo] | [acción] | [evidencia observable] |
-| 2 | [riesgo] | [baja/media/alta y motivo] | [bajo/medio/alto y motivo] | [acción] | [evidencia observable] |
-| 3 | [riesgo] | [baja/media/alta y motivo] | [bajo/medio/alto y motivo] | [acción] | [evidencia observable] |
+| 1 | Durante el trabajo sin conexión, un técnico podría sincronizar un cambio de estado basado en una asignación anterior después de que coordinación haya reasignado la incidencia. Esto podría permitir que el cambio obsoleto sobrescriba la asignación vigente o que se pierda una de las dos intenciones. | Alta: el caso define trabajo en zonas sin cobertura y establece la reasignación concurrente como un conflicto obligatorio. | Alto: podría asignar trabajo a la persona incorrecta, perder una actualización pendiente y volver inconsistente el historial de la incidencia. | Conservar una cola persistente con identidad de operación, versión base y autor; comparar la versión y el campo compuesto `work` antes de aplicar cambios y presentar el conflicto sin eliminar la operación pendiente. | Una prueba con técnico sin conexión, cambio local a `in_progress` y reasignación remota debe detectar el conflicto, conservar la nueva asignación y mantener visible la intención local pendiente. |
+| 2 | Los registros técnicos o las evidencias podrían exponer tokens, identidad personal, correo, ubicación, fotografías o comentarios internos. Esto incumpliría los límites de privacidad del caso incluso durante pruebas. | Media: CampusOps maneja varios campos sensibles, pero durante el proyecto sólo deben utilizarse cuentas y datos sintéticos. | Alto: una filtración puede exponer credenciales o información de personas e instalaciones y comprometer toda la entrega. | Usar exclusivamente datos sintéticos, sanitizar registros antes de emitirlos y solicitar cámara o ubicación sólo cuando el flujo correspondiente lo necesite. | Pruebas negativas deben comprobar que los campos sensibles aparecen redactados, que los campos técnicos permitidos se conservan y que el escaneo de secretos termina sin hallazgos. |
+| 3 | Un reintento después de un timeout podría crear dos cambios de estado, evidencias o notificaciones para una misma operación. El cliente no puede asumir que un timeout significa que el servidor no procesó la solicitud. | Media: los reintentos son previsibles en conectividad intermitente, aunque requieren una interrupción o respuesta perdida para manifestarse. | Medio: duplica el historial y puede confundir el diagnóstico, pero la incidencia sigue siendo recuperable si se conserva su identidad. | Asignar una clave de idempotencia estable a cada operación, reutilizarla al reintentar y rechazar la misma clave cuando llegue con contenido diferente. | Una comprobación debe ejecutar dos veces la misma operación con la misma clave y observar un solo efecto; si la clave se reutiliza con otro contenido, debe obtenerse un error sin crear una segunda operación. |
 
 ## Riesgo que atenderíamos primero
 
-[Indiquen cuál y justifiquen la decisión.]
-
+Atenderíamos primero el riesgo de conflicto entre trabajo sin conexión y
+reasignación porque forma parte del caso obligatorio de CampusOps, tiene alta
+probabilidad en zonas con cobertura irregular y puede producir una modificación
+por parte del técnico incorrecto. La mitigación debe impedir que un cambio
+obsoleto sobrescriba silenciosamente la asignación vigente y debe conservar ambas
+intenciones para su resolución.
