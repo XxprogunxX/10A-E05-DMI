@@ -70,3 +70,8 @@ coordinadores compartan un flujo verificable de atención.
 4. Dada una incidencia `resolved`, cuando el coordinador aprueba el trabajo,
    entonces cambia a `closed`; si decide reabrirla y existe técnico asignado,
    entonces vuelve a `assigned` sin eliminar el historial anterior.
+5. Dado que un técnico inició la atención sin conexión desde una versión anterior
+   y coordinación reasignó la incidencia antes de la sincronización, cuando el
+   dispositivo vuelve a conectarse, entonces el sistema conserva la nueva
+   asignación, mantiene visible la intención local pendiente y muestra un
+   conflicto sin sobrescribir silenciosamente ninguno de los cambios.
