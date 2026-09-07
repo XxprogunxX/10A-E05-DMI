@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "week": 1,
+  "mode": "verify",
+  "commitSha": "0184ed081a9253a908c7f7870252a6a3a8ecca4d",
+  "evaluatedAt": "2026-09-07T03:04:46.591112+00:00",
+  "status": "pass",
+  "checks": [
+    {
+      "id": "base_files",
+      "status": "pass",
+      "detail": "missing=[]"
+    },
+    {
+      "id": "react_native_profile",
+      "status": "pass",
+      "detail": "missing packages=[]"
+    },
+    {
+      "id": "toolchain_scripts",
+      "status": "pass",
+      "detail": "missing scripts=[]"
+    },
+    {
+      "id": "workflow_integrity",
+      "status": "pass",
+      "detail": "bypass markers=[]"
+    },
+    {
+      "id": "secret_scan",
+      "status": "pass",
+      "detail": "hits=[]"
+    }
+  ]
+}

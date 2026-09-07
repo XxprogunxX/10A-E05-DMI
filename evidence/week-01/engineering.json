@@ -1,20 +1,22 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Comparen alternativas reales y relacionen la decisión con una comprobación ejecutada.",
   "schemaVersion": 1,
   "week": 1,
-  "commitSha": "REEMPLAZAR_CON_SHA_DEL_COMMIT_DE_CODIGO_Y_DOCUMENTOS",
-  "decision": "REEMPLAZAR_CON_LA_DECISION_DE_ALCANCE_RIESGO_O_ACEPTACION",
+  "commitSha": "0184ed081a9253a908c7f7870252a6a3a8ecca4d",
+  "decision": "El equipo decidio priorizar el manejo de conflictos de sincronizacion entre operaciones sin conexion y reasignaciones concurrentes de coordinacion mediante una cola persistente con claves de idempotencia y versionado compuesto work, en lugar de descartar cambios o bloquear la app en zonas sin cobertura.",
   "alternatives": [
-    "REEMPLAZAR_CON_PRIMERA_ALTERNATIVA_REAL",
-    "REEMPLAZAR_CON_SEGUNDA_ALTERNATIVA_REAL"
+    "Adoptar una estrategia Last-Write-Wins (LWW) donde la ultima solicitud que llega al servidor sobrescribe el estado sin verificar version previa ni alertar al usuario.",
+    "Bloquear la aplicacion y deshabilitar el registro o actualizacion de incidencias cuando no se detecte conexion activa a la red institucional."
   ],
-  "tradeoff": "REEMPLAZAR_CON_EL_BENEFICIO_Y_EL_COSTO_DE_LA_DECISION",
-  "requirementIds": ["AC-02", "AC-04"],
+  "tradeoff": "Beneficio: previene que un tecnico sobrescriba silenciosamente una incidencia ya reasignada a otro companero en el campus y conserva la intencion local para resolucion asistida. Costo: mayor complejidad en la arquitectura de persistencia local y en el contrato de API para soportar deteccion de conflictos y reintentos.",
+  "requirementIds": [
+    "AC-02",
+    "AC-04"
+  ],
   "verification": [
     {
-      "command": "REEMPLAZAR_CON_COMANDO_EJECUTADO",
-      "result": "REEMPLAZAR_CON_RESULTADO_OBSERVADO",
-      "evidence": "REEMPLAZAR_CON_ARCHIVO_REPORTE_O_SALIDA_QUE_LO_DEMUESTRA"
+      "command": "npm run test:smoke",
+      "result": "PASS course-tests/smoke.test.tsx comprobando que el estado inicial del backend resuelve a available y la interfaz base renderiza sin errores.",
+      "evidence": "course-tests/smoke.test.tsx"
     }
   ]
 }

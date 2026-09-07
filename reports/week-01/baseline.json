@@ -1,23 +1,22 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Los demás campos deben contener evidencia real y commitSha debe ser un SHA Git completo de 40 caracteres.",
   "schemaVersion": 1,
   "week": 1,
-  "commitSha": "REEMPLAZAR_CON_SHA_DEL_COMMIT_DE_CODIGO_Y_DOCUMENTOS",
-  "generatedAt": "REEMPLAZAR_CON_FECHA_HORA_ISO_8601",
+  "commitSha": "0184ed081a9253a908c7f7870252a6a3a8ecca4d",
+  "generatedAt": "2026-09-05T22:50:00-06:00",
   "checks": [
     {
-      "id": "falla-controlada",
+      "id": "smoke-test-controlled-failure",
       "status": "fail",
       "scenarioType": "failure",
       "command": "npm run test:smoke",
-      "evidence": "REEMPLAZAR_CON_SINTOMA_OBSERVADO_Y_CAUSA_IDENTIFICADA"
+      "evidence": "Al modificar temporalmente en App.tsx el texto del titulo de CampusOps a CampusOpsError, la prueba course-tests/smoke.test.tsx fallo con 'Unable to find an element with text: CampusOps'. Causa identificada: discrepancia de contrato entre el texto esperado por la suite Jest y el componente renderizado."
     },
     {
-      "id": "correccion-verificada",
+      "id": "smoke-test-nominal-verification",
       "status": "pass",
       "scenarioType": "nominal",
       "command": "npm run test:smoke",
-      "evidence": "REEMPLAZAR_CON_RESULTADO_OBSERVABLE_DESPUES_DE_CORREGIR"
+      "evidence": "Al restaurar el texto a CampusOps en App.tsx, el comando ejecuto Jest exitosamente: PASS course-tests/smoke.test.tsx (renders the reproducible baseline and resolves backend state) con 1 passed de 1 total sin errores."
     }
   ]
 }

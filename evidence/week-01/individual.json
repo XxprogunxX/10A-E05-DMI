@@ -1,41 +1,64 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Conserven exactamente tres integrantes y usen SHA Git completos de commits creados por cada persona.",
   "schemaVersion": 1,
   "week": 1,
-  "teamId": "REEMPLAZAR_CON_ID_DEL_EQUIPO",
+  "teamId": "10A-E05",
   "members": [
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_1",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "studentId": "3523110052",
+      "commitShas": [
+        "a72224adf790fdae5542fbd701903f3332fab06f"
+      ],
+      "files": [
+        "docs/problem-definition.md"
+      ],
+      "tests": [
+        "make feedback"
+      ],
+      "reviews": [
+        "Revision de docs/problem-definition.md contra docs/CAMPUSOPS.md"
+      ],
+      "prediction": "La definicion debe cubrir problema, limites, los tres actores y el flujo completo; ademas, sus criterios deben expresar resultados observables sin exigir implementar la aplicacion completa durante Semana 1.",
+      "command": "make feedback",
+      "observedResult": "npm run typecheck, lint, test:smoke, audit:ci y bundle:release aprobaron sin errores; bundle Android generado en dist/export.",
+      "explanation": "La integracion de docs/problem-definition.md formaliza el caso CampusOps conforme a docs/CAMPUSOPS.md sin romper contratos estaticos, pruebas base ni dependencias de Expo."
     },
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_2",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "studentId": "3523110137",
+      "commitShas": [
+        "0cf18d1f3c98431126c4909e9ab388e0e124e87b"
+      ],
+      "files": [
+        "docs/risk-register.md"
+      ],
+      "tests": [
+        "npm run test:smoke"
+      ],
+      "reviews": [
+        "Revision de priorizacion de riesgos e impacto de sincronizacion offline"
+      ],
+      "prediction": "Identificar y clasificar 3 riesgos operativos concretos con su mitigacion verificable y justificar por que el riesgo de sincronizacion offline vs reasignacion debe atenderse primero.",
+      "command": "npm run test:smoke",
+      "observedResult": "PASS course-tests/smoke.test.tsx (1 passed, 1 total)",
+      "explanation": "La documentacion de riesgos en docs/risk-register.md prioriza formalmente el conflicto de conectividad y privacidad sin introducir dependencias o alteraciones de codigo."
     },
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_3",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "studentId": "3515110194",
+      "commitShas": [
+        "0184ed081a9253a908c7f7870252a6a3a8ecca4d"
+      ],
+      "files": [
+        "docs/problem-definition.md"
+      ],
+      "tests": [
+        "npm run test:smoke"
+      ],
+      "reviews": [
+        "Revision de alineacion entre el criterio de aceptacion 5 y el riesgo prioritario 1"
+      ],
+      "prediction": "Incorporar el criterio de aceptacion 5 para formalizar la deteccion y tratamiento de conflictos en modo sin conexion derivado del riesgo 1.",
+      "command": "npm run test:smoke",
+      "observedResult": "PASS course-tests/smoke.test.tsx (1 passed, 1 total)",
+      "explanation": "El criterio 5 anade una condicion observable de conflicto de sincronizacion entre cliente y coordinador, completando los requisitos de aceptacion del caso."
     }
   ]
 }
