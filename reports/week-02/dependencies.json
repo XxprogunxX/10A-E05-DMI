@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 2,
-  "commitSha": "643c8958c7ef90da21367108b2ad13384f3e9e5a",
+  "commitSha": "1a92c8fe18cd8ee621bcab4874edf4d7e648bd3e",
   "generatedAt": "2026-09-14T20:41:31.6101605-06:00",
   "contradiction": {
     "description": "Se agregó temporalmente un import de InMemoryIncidentRepository en IncidentListScreen para representar una dependencia directa UI -> infrastructure que contradice ADR-001 y el diagrama.",

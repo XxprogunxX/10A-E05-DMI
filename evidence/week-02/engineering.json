@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "week": 2,
+  "commitSha": "1a92c8fe18cd8ee621bcab4874edf4d7e648bd3e",
+  "decision": "Se selecciona la arquitectura por capas con puertos y adaptadores porque ofrece el mejor equilibrio para el proyecto: mantiene la UI separada de infraestructura, permite probar los casos de uso mediante interfaces del dominio y reduce el costo de sustituir el proveedor de incidencias. Aunque introduce mayor estructura y complejidad inicial que el acceso directo a proveedores, esa inversión mejora la mantenibilidad y hace explícita la dirección de dependencias.",
+  "requirements": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "architecture": {
+    "layers": [
+      "UI",
+      "application",
+      "domain",
+      "infrastructure"
+    ],
+    "dependencyDirection": "UI -> application -> domain <- infrastructure",
+    "compositionRoot": "src/composition/createAppDependencies.ts",
+    "providerBoundary": "IncidentRepository"
+  },
+  "implementation": {
+    "syntheticIncidentProvider": "InMemoryIncidentRepository",
+    "repositoryBehavior": [
+      "list() devuelve los mismos datos deterministas en consultas repetidas.",
+      "list() devuelve un arreglo nuevo.",
+      "Los objetos de incidencia son copias defensivas.",
+      "getById() devuelve null para un identificador inexistente."
+    ],
+    "testFile": "course-tests/architecture.test.ts"
+  },
+  "commands": [
+    {
+      "command": "npm.cmd run typecheck",
+      "observedResult": "PASS"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "observedResult": "PASS"
+    },
+    {
+      "command": "npm.cmd run audit:ci",
+      "observedResult": "2 vulnerabilidades HIGH reportadas por npm audit; el reporte recomienda npm audit fix."
+    },
+    {
+      "command": "npm.cmd run test:smoke",
+      "observedResult": "PASS: 1 suite, 2 tests aprobados."
+    },
+    {
+      "command": "npm run architecture:check",
+      "observedResult": "PASS: 7 imports por capas inspeccionados; 0 dependencias prohibidas."
+    },
+    {
+      "command": "npm run test:architecture",
+      "observedResult": "PASS: 2 tests aprobados."
+    }
+  ],
+  "officialEvaluatorObservation": {
+    "command": "python tools/course_public_evaluator.py --week 2 --mode public --execute-toolchain",
+    "observedResult": "FAIL en toolchain_1 a toolchain_4 con [WinError 2]. El evaluador intenta ejecutar npm mediante subprocess, mientras npm.cmd sí puede ejecutarse correctamente en Windows.",
+    "diagnostic": "subprocess.run(['npm.cmd','-v']) devolvió 11.16.0 y subprocess.run(['npm.cmd','run','typecheck']) devolvió código 0.",
+    "evidenceMissingAtEvaluationTime": [
+      "evidence/week-02/engineering.json",
+      "evidence/week-02/individual.json"
+    ]
+  },
+  "evidenceFiles": [
+    "docs/adr/ADR-001-architecture.md",
+    "docs/architecture.mmd",
+    "reports/week-02/dependencies.json",
+    "course-tests/architecture.test.ts"
+  ],
+  "alternatives": [
+    "UI con acceso directo a proveedores concretos: baja testabilidad, baja complejidad inicial y alto costo cuando cambia el proveedor.",
+    "Capas con puertos de dominio y adaptadores: alta testabilidad, complejidad media inicialmente y costo de cambio de proveedor localizado."
+  ],
+  "tradeoff": "La arquitectura por capas con puertos y adaptadores agrega interfaces, capas y disciplina de composición, pero reduce el acoplamiento de la UI, mejora la testabilidad de los casos de uso y permite sustituir el proveedor de incidencias sin modificar la presentación.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS",
+      "evidence": "El proyecto TypeScript compila sin errores."
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "PASS",
+      "evidence": "ESLint finaliza correctamente sin errores."
+    },
+    {
+      "command": "npm.cmd run test:smoke",
+      "result": "PASS: 1 suite, 2 tests aprobados.",
+      "evidence": "La lista y el detalle de incidencias sintéticas se ejecutan correctamente."
+    },
+    {
+      "command": "npm run architecture:check",
+      "result": "PASS: 7 imports por capas inspeccionados; 0 dependencias prohibidas.",
+      "evidence": "Se conserva la dirección UI -> application -> domain <- infrastructure."
+    },
+    {
+      "command": "npm run test:architecture",
+      "result": "PASS: 2 tests aprobados.",
+      "evidence": "El repositorio en memoria devuelve datos deterministas, arreglos y objetos independientes y null para un ID inexistente."
+    },
+    {
+      "command": "python tools/course_public_evaluator.py --week 2 --mode verify --execute-toolchain",
+      "result": "PASS",
+      "evidence": "El evaluador oficial de verificación aprobó todos los checks."
+    }
+  ]
+}

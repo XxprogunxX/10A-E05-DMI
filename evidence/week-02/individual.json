@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "week": 2,
+  "members": [
+    {
+      "studentId": "3523110052",
+      "commitShas": [
+        "b4093a389a590972fa627efa02ae195c8ebedb3f"
+      ],
+      "files": [
+        "docs/adr/ADR-001-architecture.md"
+      ],
+      "tests": [
+        "npm run architecture:check"
+      ],
+      "reviews": [
+        "Revisión de la decisión de arquitectura por capas con puertos y adaptadores."
+      ],
+      "prediction": "La arquitectura por capas debe mantener a la UI desacoplada de los proveedores concretos.",
+      "command": "npm run architecture:check",
+      "observedResult": "PASS: 7 imports por capas inspeccionados; 0 dependencias prohibidas.",
+      "explanation": "La decisión documentada establece UI -> application -> domain <- infrastructure y concentra la selección del proveedor en el composition root."
+    },
+    {
+      "studentId": "3523110137",
+      "commitShas": [
+        "643c8958c7ef90da21367108b2ad13384f3e9e5a",
+        "4516ba9fa3bf7bafb9bf2c4df9564a30379c1df9"
+      ],
+      "files": [
+        "reports/week-02/dependencies.json"
+      ],
+      "tests": [
+        "node tools/check-architecture.mjs",
+        "npm run test:architecture"
+      ],
+      "reviews": [
+        "Revisión de la contradicción controlada UI -> infrastructure y de su corrección.",
+        "Revisión de la evidencia de sustitución del repositorio mediante el puerto de dominio."
+      ],
+      "prediction": "Una dependencia directa de UI hacia infraestructura debe ser detectada por el control arquitectónico y corregirse para recuperar el desacoplamiento.",
+      "command": "node tools/check-architecture.mjs",
+      "observedResult": "Se documentó un fallo controlado UI -> infrastructure y posteriormente PASS con 7 imports inspeccionados y 0 dependencias prohibidas.",
+      "explanation": "La dependencia directa habría acoplado IncidentListScreen al proveedor concreto. Al retirarla, la infraestructura queda seleccionada en createAppDependencies y la UI conserva su dependencia hacia el caso de uso."
+    },
+    {
+      "studentId": "3515110194",
+      "commitShas": [
+        "1a92c8fe18cd8ee621bcab4874edf4d7e648bd3e"
+      ],
+      "files": [
+        "course-tests/architecture.test.ts"
+      ],
+      "tests": [
+        "npm run test:architecture"
+      ],
+      "reviews": [
+        "Revisión de la coherencia entre InMemoryIncidentRepository, ADR-003 y docs/architecture.mmd.",
+        "Verificación de comportamiento determinista y copias defensivas del repositorio en memoria."
+      ],
+      "prediction": "Las consultas repetidas al repositorio en memoria deben producir los mismos datos sin compartir referencias mutables entre resultados, y un identificador inexistente debe devolver null.",
+      "command": "npm run test:architecture",
+      "observedResult": "PASS: architecture check con 7 imports inspeccionados y 0 dependencias prohibidas; 2 pruebas de arquitectura aprobadas.",
+      "explanation": "El test comprueba igualdad de resultados entre consultas, arreglos distintos, objetos de incidencia distintos y null para un ID inexistente. Esto respalda la testabilidad del adaptador mediante el puerto IncidentRepository y mantiene coherencia con ADR-003 y el diagrama."
+    }
+  ],
+  "teamId": "10A-E05-DMI"
+}
