@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "week": 2,
+  "commitSha": "643c8958c7ef90da21367108b2ad13384f3e9e5a",
+  "generatedAt": "2026-09-14T20:41:31.6101605-06:00",
+  "contradiction": {
+    "description": "Se agregó temporalmente un import de InMemoryIncidentRepository en IncidentListScreen para representar una dependencia directa UI -> infrastructure que contradice ADR-001 y el diagrama.",
+    "effect": "La pantalla quedaría acoplada al proveedor concreto; sustituir el repositorio obligaría a modificar UI y evitaría comprobar el caso de uso mediante el puerto del dominio.",
+    "correction": "Se retiró el import temporal. IncidentListScreen conserva únicamente su dependencia hacia ListIncidents, y la infraestructura vuelve a seleccionarse sólo en createAppDependencies.",
+    "committedBrokenState": false
+  },
+  "checks": [
+    {
+      "id": "controlled-ui-infrastructure-violation",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "node tools/check-architecture.mjs",
+      "evidence": "Architecture boundary violation detected: src\\ui\\screens\\IncidentListScreen.tsx: ui -> infrastructure (../../infrastructure/incidents/InMemoryIncidentRepository). El proceso terminó con código 1."
+    },
+    {
+      "id": "corrected-layered-dependencies",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "node tools/check-architecture.mjs",
+      "evidence": "Architecture check passed: 7 layered imports inspected; 0 forbidden dependencies. El proceso terminó con código 0 después de retirar el import temporal."
+    },
+    {
+      "id": "substitutable-incident-repository",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:architecture",
+      "evidence": "PASS course-tests/architecture.test.ts: application use cases accept a replacement repository through the domain port. 1 prueba aprobada de 1."
+    }
+  ]
+}
