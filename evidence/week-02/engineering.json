@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 2,
-  "commitSha": "1a92c8fe18cd8ee621bcab4874edf4d7e648bd3e",
+  "commitSha": "3228d2d78c6b8100f5430af12e4c1abdef9300d6",
   "decision": "Se selecciona la arquitectura por capas con puertos y adaptadores porque ofrece el mejor equilibrio para el proyecto: mantiene la UI separada de infraestructura, permite probar los casos de uso mediante interfaces del dominio y reduce el costo de sustituir el proveedor de incidencias. Aunque introduce mayor estructura y complejidad inicial que el acceso directo a proveedores, esa inversión mejora la mantenibilidad y hace explícita la dirección de dependencias.",
   "requirements": [
     "AC-01",
@@ -57,15 +57,6 @@
       "observedResult": "PASS: 2 tests aprobados."
     }
   ],
-  "officialEvaluatorObservation": {
-    "command": "python tools/course_public_evaluator.py --week 2 --mode public --execute-toolchain",
-    "observedResult": "FAIL en toolchain_1 a toolchain_4 con [WinError 2]. El evaluador intenta ejecutar npm mediante subprocess, mientras npm.cmd sí puede ejecutarse correctamente en Windows.",
-    "diagnostic": "subprocess.run(['npm.cmd','-v']) devolvió 11.16.0 y subprocess.run(['npm.cmd','run','typecheck']) devolvió código 0.",
-    "evidenceMissingAtEvaluationTime": [
-      "evidence/week-02/engineering.json",
-      "evidence/week-02/individual.json"
-    ]
-  },
   "evidenceFiles": [
     "docs/adr/ADR-001-architecture.md",
     "docs/architecture.mmd",

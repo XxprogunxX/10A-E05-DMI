@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "week": 2,
-  "commitSha": "1a92c8fe18cd8ee621bcab4874edf4d7e648bd3e",
-  "generatedAt": "2026-09-14T20:41:31.6101605-06:00",
+  "commitSha": "3228d2d78c6b8100f5430af12e4c1abdef9300d6",
+  "generatedAt": "2026-09-14T23:15:59.8307417-06:00",
   "contradiction": {
     "description": "Se agregó temporalmente un import de InMemoryIncidentRepository en IncidentListScreen para representar una dependencia directa UI -> infrastructure que contradice ADR-001 y el diagrama.",
     "effect": "La pantalla quedaría acoplada al proveedor concreto; sustituir el repositorio obligaría a modificar UI y evitaría comprobar el caso de uso mediante el puerto del dominio.",
@@ -29,7 +29,7 @@
       "status": "pass",
       "scenarioType": "nominal",
       "command": "npm run test:architecture",
-      "evidence": "PASS course-tests/architecture.test.ts: application use cases accept a replacement repository through the domain port. 1 prueba aprobada de 1."
+      "evidence": "PASS course-tests/architecture.test.ts: los casos de uso aceptan un repositorio sustituto y el adaptador en memoria devuelve copias deterministas. 2 pruebas aprobadas de 2."
     }
   ]
 }

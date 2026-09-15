@@ -8,18 +8,21 @@
         "b4093a389a590972fa627efa02ae195c8ebedb3f"
       ],
       "files": [
-        "docs/adr/ADR-001-architecture.md"
+        "App.tsx",
+        "src/composition/createAppDependencies.ts",
+        "tools/check-architecture.mjs"
       ],
       "tests": [
-        "npm run architecture:check"
+        "npm run architecture:check",
+        "npm run test:smoke"
       ],
       "reviews": [
-        "Revisión de la decisión de arquitectura por capas con puertos y adaptadores."
+        "Revisión de los límites entre UI, aplicación, dominio e infraestructura implementados en el esqueleto."
       ],
       "prediction": "La arquitectura por capas debe mantener a la UI desacoplada de los proveedores concretos.",
       "command": "npm run architecture:check",
       "observedResult": "PASS: 7 imports por capas inspeccionados; 0 dependencias prohibidas.",
-      "explanation": "La decisión documentada establece UI -> application -> domain <- infrastructure y concentra la selección del proveedor en el composition root."
+      "explanation": "El esqueleto implementado conecta la lista y el detalle con casos de uso inyectados, concentra la selección del proveedor en createAppDependencies y verifica que la UI no importe infraestructura."
     },
     {
       "studentId": "3523110137",
@@ -64,5 +67,5 @@
       "explanation": "El test comprueba igualdad de resultados entre consultas, arreglos distintos, objetos de incidencia distintos y null para un ID inexistente. Esto respalda la testabilidad del adaptador mediante el puerto IncidentRepository y mantiene coherencia con ADR-003 y el diagrama."
     }
   ],
-  "teamId": "10A-E05-DMI"
+  "teamId": "10A-E05"
 }
