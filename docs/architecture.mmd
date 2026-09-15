@@ -1,0 +1,73 @@
+flowchart LR
+  %% CampusOps semana 2: las cajas punteadas representan límites previstos,
+  %% no funcionalidades implementadas en esta entrega.
+
+  subgraph actors["Perfiles de usuario"]
+    reporter["Reportante"]
+    technician["Técnico"]
+    coordinator["Coordinador"]
+  end
+
+  entry["App.tsx<br/>entrada y navegación local"]
+
+  subgraph ui["UI"]
+    listScreen["IncidentListScreen"]
+    detailScreen["IncidentDetailScreen"]
+    sessionViews["Vistas por sesión y perfil<br/>(previsto)"]
+  end
+
+  subgraph application["application"]
+    listUseCase["ListIncidents"]
+    detailUseCase["GetIncidentDetail"]
+    sessionCases["Casos de sesión<br/>(previsto)"]
+    syncCases["Coordinación de persistencia<br/>y sincronización (previsto)"]
+    locationCases["Casos de ubicación<br/>(previsto)"]
+  end
+
+  subgraph domain["domain"]
+    incident["Incident"]
+    repositoryPort["IncidentRepository<br/>puerto"]
+    roles["Reglas de Reportante,<br/>Técnico y Coordinador (previsto)"]
+    sessionPort["SessionPort<br/>(previsto)"]
+    locationPort["LocationProvider<br/>(previsto)"]
+  end
+
+  subgraph infrastructure["infrastructure"]
+    memoryRepository["InMemoryIncidentRepository<br/>datos sintéticos"]
+    persistentAdapter["Persistencia / API / cola offline<br/>(previsto)"]
+    sessionAdapter["Proveedor de sesión<br/>(previsto)"]
+    locationAdapter["Proveedor de ubicación<br/>(previsto)"]
+  end
+
+  composition["createAppDependencies<br/>raíz de composición"]
+
+  reporter --> entry
+  technician --> entry
+  coordinator --> entry
+  entry --> listScreen
+  entry --> detailScreen
+
+  listScreen --> listUseCase
+  detailScreen --> detailUseCase
+  sessionViews -.-> sessionCases
+
+  listUseCase --> repositoryPort
+  detailUseCase --> repositoryPort
+  listUseCase --> incident
+  detailUseCase --> incident
+  sessionCases -.-> sessionPort
+  syncCases -.-> repositoryPort
+  locationCases -.-> locationPort
+
+  memoryRepository -. "implementa" .-> repositoryPort
+  persistentAdapter -. "implementará" .-> repositoryPort
+  sessionAdapter -. "implementará" .-> sessionPort
+  locationAdapter -. "implementará" .-> locationPort
+
+  composition --> memoryRepository
+  composition --> listUseCase
+  composition --> detailUseCase
+  entry --> composition
+
+  classDef deferred stroke-dasharray: 5 5,color:#555;
+  class sessionViews,sessionCases,syncCases,locationCases,roles,sessionPort,locationPort,persistentAdapter,sessionAdapter,locationAdapter deferred;
