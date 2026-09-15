@@ -1,8 +1,9 @@
+
 import { GetIncidentDetail } from '../src/application/incidents/GetIncidentDetail';
 import { ListIncidents } from '../src/application/incidents/ListIncidents';
 import type { Incident } from '../src/domain/incidents/Incident';
 import type { IncidentRepository } from '../src/domain/incidents/IncidentRepository';
-
+import { InMemoryIncidentRepository } from '../src/infrastructure/incidents/InMemoryIncidentRepository';
 const replacementIncident: Incident = {
   id: 'TEST-001',
   title: 'Proveedor sustituido',
@@ -36,4 +37,15 @@ test('application use cases accept a replacement repository through the domain p
     replacementIncident,
   );
   await expect(getIncidentDetail.execute('missing')).resolves.toBeNull();
+});
+test('in-memory repository returns deterministic defensive copies', async () => {
+  const repository = new InMemoryIncidentRepository();
+
+  const first = await repository.list();
+  const second = await repository.list();
+
+  expect(first).toEqual(second);
+  expect(first).not.toBe(second);
+  expect(first[0]).not.toBe(second[0]);
+  await expect(repository.getById('missing')).resolves.toBeNull();
 });
