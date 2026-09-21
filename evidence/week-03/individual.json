@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "teamId": "10A-E05",
+  "members": [
+    {
+      "studentId": "3523110052",
+      "name": "Javier",
+      "commitShas": [
+        "0db949c0acdd443e770d51ca899d934581e07226"
+      ],
+      "files": [
+        ".github/workflows/week-03-ci-amenazas-feedback.yml",
+        "course-tests/week-03-workflow.test.ts"
+      ],
+      "tests": [
+        "npm run test:workflow"
+      ],
+      "reviews": [],
+      "prediction": "El flujo debe conservar los controles de seguridad y verificar la revisión de amenazas.",
+      "command": "npm run test:workflow",
+      "observedResult": "PASS: 1 suite y 2 pruebas aprobadas.",
+      "explanation": "Javier implementó y verificó el flujo de CI y las pruebas asociadas a los controles de seguridad."
+    },
+    {
+      "studentId": "3523110137",
+      "name": "Francisco",
+      "commitShas": [
+        "570591e3e68787818d49baf6a9b7a7d745ce4447"
+      ],
+      "files": [
+        "docs/threat-model.md",
+        "docs/adr/ADR-006-security-priority.md"
+      ],
+      "tests": [],
+      "reviews": [
+        "Revisión de docs/threat-model.md para confirmar TM-01 a TM-04, fronteras de confianza, controles, verificación y riesgo residual."
+      ],
+      "prediction": "El modelo de amenazas debe documentar los riesgos principales, controles y prioridad de seguridad.",
+      "command": "Get-Content docs/threat-model.md",
+      "observedResult": "El modelo contiene TM-01 a TM-04, fronteras de confianza, controles, verificación y riesgo residual.",
+      "explanation": "Francisco elaboró el modelo de amenazas y el ADR que documenta la prioridad de seguridad; la revisión confirma la presencia de los elementos requeridos."
+    },
+    {
+      "studentId": "3515110194",
+      "name": "Carlos",
+      "commitShas": [
+        "d2083c4baed77841595bf93925baf42c6df196d2"
+      ],
+      "files": [
+        "course-tests/week-03-security.test.ts"
+      ],
+      "tests": [
+        "npm run test:security-model",
+        "npm run test:workflow",
+        "npm run typecheck",
+        "npm run lint"
+      ],
+      "reviews": [],
+      "prediction": "Las pruebas deben comprobar la trazabilidad de las amenazas y mantener los controles de seguridad verificables.",
+      "command": "npm run test:security-model",
+      "observedResult": "PASS: 1 suite y 2 pruebas aprobadas.",
+      "explanation": "Carlos agregó la prueba automatizada de trazabilidad del modelo de amenazas y verificó el flujo, TypeScript y lint."
+    }
+  ]
+}
