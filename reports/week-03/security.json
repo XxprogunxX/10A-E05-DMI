@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "commitSha": "d2083c4baed77841595bf93925baf42c6df196d2",
+  "generatedAt": "2026-09-21T00:25:46.799823+00:00",
+  "checks": [
+    {
+      "id": "synthetic-secret-detected",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "py -3 tools/course_public_evaluator.py --week 3 --mode verify --execute-toolchain",
+      "evidence": "secret_scan: fail; hits=['.controlled-security-test\\\\fake-secret.txt:github_token']"
+    },
+    {
+      "id": "secret-scan-corrected",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "py -3 tools/course_public_evaluator.py --week 3 --mode verify --execute-toolchain",
+      "evidence": "secret_scan: pass; hits=[]; el estado global del evaluador fue fail por WinError 2 en toolchain_1 a toolchain_4"
+    },
+    {
+      "id": "threat-model-traceability",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:security-model",
+      "evidence": "Test Suites: 1 passed, 1 total; Tests: 2 passed, 2 total"
+    },
+    {
+      "id": "workflow-security-gates",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:workflow",
+      "evidence": "Test Suites: 1 passed, 1 total; Tests: 2 passed, 2 total"
+    }
+  ]
+}

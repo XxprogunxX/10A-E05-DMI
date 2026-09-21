@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "mode": "public",
+  "commitSha": "d2083c4baed77841595bf93925baf42c6df196d2",
+  "evaluatedAt": "2026-09-21T00:54:31.582418+00:00",
+  "status": "fail",
+  "checks": [
+    {
+      "id": "base_files",
+      "status": "pass",
+      "detail": "missing=[]"
+    },
+    {
+      "id": "react_native_profile",
+      "status": "pass",
+      "detail": "missing packages=[]"
+    },
+    {
+      "id": "toolchain_scripts",
+      "status": "pass",
+      "detail": "missing scripts=[]"
+    },
+    {
+      "id": "workflow_integrity",
+      "status": "pass",
+      "detail": "bypass markers=[]"
+    },
+    {
+      "id": "secret_scan",
+      "status": "pass",
+      "detail": "hits=[]"
+    },
+    {
+      "id": "required_evidence",
+      "status": "pass",
+      "detail": "missing/empty=[]"
+    },
+    {
+      "id": "schema:reports/week-03/security.json",
+      "status": "pass",
+      "detail": "4 checks indexed, 2 boundary/failure; report evaluates HEAD"
+    },
+    {
+      "id": "schema:evidence/week-03/engineering.json",
+      "status": "pass",
+      "detail": "decision evidence is substantive and reproducible; report evaluates HEAD"
+    },
+    {
+      "id": "schema:evidence/week-03/individual.json",
+      "status": "pass",
+      "detail": "three individual evidence records found"
+    },
+    {
+      "id": "toolchain_1",
+      "status": "fail",
+      "detail": "npm run typecheck\n[WinError 2] El sistema no puede encontrar el archivo especificado"
+    },
+    {
+      "id": "toolchain_2",
+      "status": "fail",
+      "detail": "npm run lint\n[WinError 2] El sistema no puede encontrar el archivo especificado"
+    },
+    {
+      "id": "toolchain_3",
+      "status": "fail",
+      "detail": "npm run audit:ci\n[WinError 2] El sistema no puede encontrar el archivo especificado"
+    },
+    {
+      "id": "toolchain_4",
+      "status": "fail",
+      "detail": "npm test -- --ci --runInBand course-tests/public/week-03.test.ts\n[WinError 2] El sistema no puede encontrar el archivo especificado"
+    }
+  ]
+}
