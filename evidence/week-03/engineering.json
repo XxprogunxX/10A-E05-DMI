@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 3,
-  "commitSha": "d2083c4baed77841595bf93925baf42c6df196d2",
+  "commitSha": "73b2ed222144a5ee932d5f31c8b24217f62152e4",
   "decision": "Priorizar TM-04: exposición de credenciales.",
   "alternatives": [
     "Revisión manual.",
