@@ -24,7 +24,8 @@
     "bundle:release": "expo export --platform android --output-dir dist/export",
     "native:generate": "expo prebuild --platform android --no-install",
     "package:android:ci": "npm run native:generate && ./android/gradlew -p android assembleDebug",
-    "package:android": "npm run native:generate && ./android/gradlew -p android assembleRelease"
+    "package:android": "npm run native:generate && ./android/gradlew -p android assembleRelease",
+    "test:security-model": "jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-03-security.test.ts"
   },
   "dependencies": {
     "expo": "~57.0.9",
