@@ -8,9 +8,9 @@ Esta auditoría revisa cómo CampusOps protege información sensible durante el 
 
 | # | Hallazgo | Riesgo | Solución aplicada | Evidencia |
 |---|---|---|---|---|
-| 1 | La función `redactForTelemetry` no estaba implementada | Los registros podían conservar cabeceras de autorización, correo, nombre, ubicación, fotografías o comentarios internos | Se implementó una copia recursiva que sustituye claves sensibles por `[REDACTED]` sin modificar la entrada | [Antes](evidence/hallazgo-1-antes.txt) y [después](evidence/hallazgo-1-despues.txt) |
-| 2 | El backend respondía con `access-control-allow-origin: *` | Cualquier sitio web podía recibir autorización CORS para leer respuestas del backend desde un navegador | Se sustituyó el comodín por una lista de orígenes permitidos configurada con `COURSE_ALLOWED_ORIGINS` | [Antes](evidence/hallazgo-2-antes.txt) y [después](evidence/hallazgo-2-despues.txt) |
-| 3 | La auditoría de dependencias reportó vulnerabilidades de severidad alta en `@xmldom/xmldom` y `js-yaml` | Entradas XML o YAML malformadas podrían causar inyección o consumo excesivo de CPU y memoria | Quedó pendiente porque las versiones llegan de forma transitiva por Expo, ESLint y Jest y requieren una actualización controlada con pruebas de compatibilidad | [Observación](evidence/hallazgo-3-observacion.txt) |
+| 1 | La función `redactForTelemetry` no estaba implementada | Los registros podían conservar cabeceras de autorización, correo, nombre, ubicación, fotografías o comentarios internos | Se implementó una copia recursiva que sustituye claves sensibles por `[REDACTED]` sin modificar la entrada | [Texto antes](evidence/hallazgo-1-antes.txt), [captura antes](evidence/telemetria-antes.png), [texto después](evidence/hallazgo-1-despues.txt) y [captura después](evidence/telemetria-despues.png) |
+| 2 | El backend respondía con `access-control-allow-origin: *` | Cualquier sitio web podía recibir autorización CORS para leer respuestas del backend desde un navegador | Se sustituyó el comodín por una lista de orígenes permitidos configurada con `COURSE_ALLOWED_ORIGINS` | [Texto antes](evidence/hallazgo-2-antes.txt), [captura antes](evidence/cors-antes.png), [texto después](evidence/hallazgo-2-despues.txt) y [captura después](evidence/cors-despues.png) |
+| 3 | La auditoría de dependencias reportó vulnerabilidades de severidad alta en `@xmldom/xmldom` y `js-yaml` | Entradas XML o YAML malformadas podrían causar inyección o consumo excesivo de CPU y memoria | Quedó pendiente porque las versiones llegan de forma transitiva por Expo, ESLint y Jest y requieren una actualización controlada con pruebas de compatibilidad | [Observación](evidence/hallazgo-3-observacion.txt), [detalle](evidence/dependencias-audit-detalle.png) y [resumen](evidence/dependencias-audit-resumen.png) |
 
 ## Hallazgo 1 Sanitización de telemetría ausente
 
@@ -30,7 +30,7 @@ Se ejecutó:
 npm test -- --ci --runInBand course-tests/public/week-04.test.ts
 ```
 
-La prueba falló porque `redactForTelemetry` no estaba implementada. La salida resumida se guardó en `docs/evidence/hallazgo-1-antes.txt`.
+La prueba falló porque `redactForTelemetry` no estaba implementada. La salida resumida se guardó en `docs/evidence/hallazgo-1-antes.txt` y la captura correspondiente en `docs/evidence/telemetria-antes.png`.
 
 ### Solución aplicada
 
@@ -46,7 +46,7 @@ Se ejecutó:
 npm test -- --ci --runInBand course-tests/public/week-04.test.ts course-tests/week-04-security.test.ts
 ```
 
-Las dos suites y sus dos pruebas terminaron correctamente. El resultado se guardó en `docs/evidence/hallazgo-1-despues.txt`.
+Las dos suites y sus dos pruebas terminaron correctamente. El resultado se guardó en `docs/evidence/hallazgo-1-despues.txt` y la captura en `docs/evidence/telemetria-despues.png`.
 
 ## Hallazgo 2 Política CORS demasiado abierta
 
@@ -66,7 +66,7 @@ Se agregó una prueba reproducible y se ejecutó:
 node course-backend/security-self-test.mjs
 ```
 
-La prueba falló con el mensaje `an untrusted website must not receive wildcard CORS permission`. La salida se guardó en `docs/evidence/hallazgo-2-antes.txt`.
+La prueba falló con el mensaje `an untrusted website must not receive wildcard CORS permission`. La salida se guardó en `docs/evidence/hallazgo-2-antes.txt` y la captura en `docs/evidence/cors-antes.png`.
 
 ### Solución aplicada
 
@@ -74,7 +74,7 @@ El backend ahora construye una lista permitida desde `COURSE_ALLOWED_ORIGINS`. S
 
 ### Evidencia después de la corrección
 
-Se repitió el mismo comando. La prueba confirmó que `https://attacker.example` no recibe permiso y que el origen configurado sí lo recibe. El resultado se guardó en `docs/evidence/hallazgo-2-despues.txt`.
+Se repitió el mismo comando. La prueba confirmó que `https://attacker.example` no recibe permiso y que el origen configurado sí lo recibe. El resultado se guardó en `docs/evidence/hallazgo-2-despues.txt` y la captura en `docs/evidence/cors-despues.png`.
 
 ## Hallazgo 3 Dependencias con vulnerabilidades conocidas
 
@@ -88,7 +88,7 @@ Las alertas de `@xmldom/xmldom` incluyen casos de inyección de XML y consumo cu
 
 ### Tratamiento
 
-Este hallazgo quedó pendiente. `npm audit` propone ejecutar `npm audit fix`, pero las versiones son transitivas de herramientas centrales del proyecto. La corrección debe hacerse en una tarea separada: revisar el cambio propuesto, actualizar el archivo de bloqueo, ejecutar todas las pruebas y confirmar que Expo continúa generando la aplicación. La actividad exige corregir por lo menos dos hallazgos, requisito cubierto por las correcciones de sanitización y CORS. La salida resumida se encuentra en `docs/evidence/hallazgo-3-observacion.txt`.
+Este hallazgo quedó pendiente. `npm audit` propone ejecutar `npm audit fix`, pero las versiones son transitivas de herramientas centrales del proyecto. La corrección debe hacerse en una tarea separada: revisar el cambio propuesto, actualizar el archivo de bloqueo, ejecutar todas las pruebas y confirmar que Expo continúa generando la aplicación. La actividad exige corregir por lo menos dos hallazgos, requisito cubierto por las correcciones de sanitización y CORS. La salida resumida se encuentra en `docs/evidence/hallazgo-3-observacion.txt`, con capturas de detalle y resumen en `docs/evidence/dependencias-audit-detalle.png` y `docs/evidence/dependencias-audit-resumen.png`.
 
 ## Comprobación final
 
