@@ -4,7 +4,7 @@
   "teamId": "10A-E05",
   "members": [
     {
-      "studentId": "3523110052",
+      "studentId": "STUDENT-001",
       "commitShas": [
         "a72224adf790fdae5542fbd701903f3332fab06f"
       ],
@@ -23,7 +23,7 @@
       "explanation": "La integracion de docs/problem-definition.md formaliza el caso CampusOps conforme a docs/CAMPUSOPS.md sin romper contratos estaticos, pruebas base ni dependencias de Expo."
     },
     {
-      "studentId": "3523110137",
+      "studentId": "STUDENT-002",
       "commitShas": [
         "0cf18d1f3c98431126c4909e9ab388e0e124e87b"
       ],
@@ -42,7 +42,7 @@
       "explanation": "La documentacion de riesgos en docs/risk-register.md prioriza formalmente el conflicto de conectividad y privacidad sin introducir dependencias o alteraciones de codigo."
     },
     {
-      "studentId": "3515110194",
+      "studentId": "STUDENT-003",
       "commitShas": [
         "0184ed081a9253a908c7f7870252a6a3a8ecca4d"
       ],

@@ -4,7 +4,7 @@
   "teamId": "10A-E05",
   "members": [
     {
-      "studentId": "3523110052",
+      "studentId": "STUDENT-001",
       "name": "Javier",
       "commitShas": [
         "0db949c0acdd443e770d51ca899d934581e07226"
@@ -23,7 +23,7 @@
       "explanation": "Javier implementó y verificó el flujo de CI y las pruebas asociadas a los controles de seguridad."
     },
     {
-      "studentId": "3523110137",
+      "studentId": "STUDENT-002",
       "name": "Francisco",
       "commitShas": [
         "570591e3e68787818d49baf6a9b7a7d745ce4447"
@@ -42,7 +42,7 @@
       "explanation": "Francisco elaboró el modelo de amenazas y el ADR que documenta la prioridad de seguridad; la revisión confirma la presencia de los elementos requeridos."
     },
     {
-      "studentId": "3515110194",
+      "studentId": "STUDENT-003",
       "name": "Carlos",
       "commitShas": [
         "d2083c4baed77841595bf93925baf42c6df196d2"

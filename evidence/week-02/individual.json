@@ -3,7 +3,7 @@
   "week": 2,
   "members": [
     {
-      "studentId": "3523110052",
+      "studentId": "STUDENT-001",
       "commitShas": [
         "b4093a389a590972fa627efa02ae195c8ebedb3f"
       ],
@@ -25,7 +25,7 @@
       "explanation": "El esqueleto implementado conecta la lista y el detalle con casos de uso inyectados, concentra la selección del proveedor en createAppDependencies y verifica que la UI no importe infraestructura."
     },
     {
-      "studentId": "3523110137",
+      "studentId": "STUDENT-002",
       "commitShas": [
         "643c8958c7ef90da21367108b2ad13384f3e9e5a",
         "4516ba9fa3bf7bafb9bf2c4df9564a30379c1df9"
@@ -47,7 +47,7 @@
       "explanation": "La dependencia directa habría acoplado IncidentListScreen al proveedor concreto. Al retirarla, la infraestructura queda seleccionada en createAppDependencies y la UI conserva su dependencia hacia el caso de uso."
     },
     {
-      "studentId": "3515110194",
+      "studentId": "STUDENT-003",
       "commitShas": [
         "1a92c8fe18cd8ee621bcab4874edf4d7e648bd3e"
       ],
