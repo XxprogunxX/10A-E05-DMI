@@ -1,0 +1,9 @@
+Comando ejecutado
+node course-backend/security-self-test.mjs
+
+Resultado observado antes de la correccion
+AssertionError: an untrusted website must not receive wildcard CORS permission
+Valor recibido en access-control-allow-origin: *
+
+Interpretacion
+El backend autorizaba solicitudes de navegador desde cualquier origen. La prueba uso el origen ficticio https://attacker.example y demostro que recibia el permiso comodin.

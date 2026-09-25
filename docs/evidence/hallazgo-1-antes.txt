@@ -1,0 +1,11 @@
+Comando ejecutado
+npm test -- --ci --runInBand course-tests/public/week-04.test.ts
+
+Resultado observado antes de la correccion
+FAIL course-tests/public/week-04.test.ts
+redactForTelemetry must be implemented in the assigned week
+Test Suites: 1 failed, 1 total
+Tests: 1 failed, 1 total
+
+Interpretacion
+La aplicacion no tenia implementado el control que elimina datos sensibles antes de enviarlos a telemetria. Los valores de autorizacion, correo, ubicacion, fotografias y comentarios podian conservarse sin redactar.

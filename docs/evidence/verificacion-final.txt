@@ -1,0 +1,13 @@
+Comandos ejecutados
+npm run test:security-week4
+npm run typecheck
+npm run lint
+npm run backend:self-test
+npm run test:smoke
+
+Resultados observados
+- test:security-week4: PASS, 2 suites y 2 pruebas aprobadas; la prueba CORS tambien termino en PASS.
+- typecheck: PASS, TypeScript no reporto errores.
+- lint: PASS, ESLint no reporto errores.
+- backend:self-test: PASS, los contratos didacticos del backend continuan funcionando.
+- test:smoke: PASS, 2 pruebas de funcionamiento general aprobadas.

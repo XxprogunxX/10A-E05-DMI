@@ -1,0 +1,10 @@
+Comando ejecutado
+node course-backend/security-self-test.mjs
+
+Resultado observado despues de la correccion
+PASS: CORS only authorizes the configured application origin.
+
+Comprobaciones realizadas
+- El origen ficticio https://attacker.example no recibe access-control-allow-origin.
+- El origen configurado https://app.campusops.test recibe permiso.
+- La respuesta autorizada incluye Vary: Origin para evitar reutilizar una decision CORS incorrecta desde cache.

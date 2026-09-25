@@ -1,0 +1,14 @@
+Comando ejecutado
+npm test -- --ci --runInBand course-tests/public/week-04.test.ts course-tests/week-04-security.test.ts
+
+Resultado observado despues de la correccion
+PASS course-tests/public/week-04.test.ts
+PASS course-tests/week-04-security.test.ts
+Test Suites: 2 passed, 2 total
+Tests: 2 passed, 2 total
+
+Comprobaciones realizadas
+- Los campos sensibles se sustituyen por [REDACTED].
+- Los datos tecnicos permitidos, como incidentId y correlationId, se conservan.
+- Se reconocen variantes de claves con mayusculas, guiones y guiones bajos.
+- El objeto de entrada no se modifica.

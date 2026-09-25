@@ -4,13 +4,28 @@ import { handleCampusOps } from './campusops.mjs';
 
 const host = process.env.COURSE_BACKEND_HOST ?? '127.0.0.1';
 const port = Number(process.env.COURSE_BACKEND_PORT ?? 4310);
+const allowedOrigins = new Set(
+  (process.env.COURSE_ALLOWED_ORIGINS ?? 'http://localhost:8081,http://127.0.0.1:8081')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
 const completedOperations = new Map();
+
+function corsHeaders(response) {
+  const origin = response.req?.headers.origin;
+  if (typeof origin !== 'string' || !allowedOrigins.has(origin)) return {};
+  return {
+    'access-control-allow-origin': origin,
+    vary: 'Origin',
+  };
+}
 
 function send(response, status, body, headers = {}) {
   const value = typeof body === 'string' ? body : JSON.stringify(body);
   response.writeHead(status, {
-    'access-control-allow-origin': '*',
     'content-type': typeof body === 'string' ? 'application/json' : 'application/json; charset=utf-8',
+    ...corsHeaders(response),
     ...headers,
   });
   response.end(value);

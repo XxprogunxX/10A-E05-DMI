@@ -1,0 +1,13 @@
+Comando ejecutado
+npm audit --omit=dev --audit-level=critical
+npm ls @xmldom/xmldom js-yaml
+
+Resultado observado
+La auditoria reporto dos grupos de vulnerabilidades de severidad alta:
+- @xmldom/xmldom 0.8.14 y 0.9.11: inyeccion de XML y consumo excesivo de tiempo o memoria con entradas malformadas.
+- js-yaml 3.15.1 y 4.3.1: consumo elevado de CPU mediante claves merge.
+
+Las dependencias llegan de forma transitiva por herramientas de Expo, ESLint y Jest. npm indico que existe una correccion mediante npm audit fix.
+
+Interpretacion
+Procesar XML o YAML no confiable con versiones vulnerables puede permitir inyeccion o denegacion de servicio. El hallazgo queda pendiente porque actualizar dependencias transitivas de Expo y React Native requiere comprobar compatibilidad, regenerar el archivo de bloqueo y repetir el conjunto completo de pruebas. La actividad exige corregir al menos dos de los tres hallazgos; los hallazgos 1 y 2 ya fueron corregidos y comprobados.
