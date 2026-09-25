@@ -85,9 +85,7 @@ export function IncidentListScreen({ listIncidents, onSelectIncident }: Props) {
             <Text style={styles.cardTitle}>{incident.title}</Text>
             <Text style={styles.badge}>{statusLabels[incident.status]}</Text>
           </View>
-          <Text>
-            {incident.category} · {incident.location}
-          </Text>
+          <Text>{incident.category}</Text>
           <Text style={styles.identifier}>
             {incident.id} · Prioridad {incident.priority}
           </Text>

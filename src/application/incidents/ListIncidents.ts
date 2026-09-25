@@ -4,7 +4,6 @@ export interface IncidentSummary {
   readonly id: string;
   readonly title: string;
   readonly category: string;
-  readonly location: string;
   readonly priority: 'low' | 'medium' | 'high';
   readonly status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
 }
@@ -16,11 +15,10 @@ export class ListIncidents {
     const incidents = await this.repository.list();
 
     return incidents.map(
-      ({ id, title, category, location, priority, status }) => ({
+      ({ id, title, category, priority, status }) => ({
         id,
         title,
         category,
-        location,
         priority,
         status,
       }),
