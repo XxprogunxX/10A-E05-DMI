@@ -21,12 +21,21 @@ La configuración usa `WHEN_UNLOCKED_THIS_DEVICE_ONLY`, limita el acceso al disp
 
 ## Control SC-04-01 — Sanitización antes de telemetría
 
-- Punto común: `redactForTelemetry` en `src/course-evaluation/index.ts`.
+- Punto común: `redactTelemetry` en `src/domain/telemetry/redactTelemetry.ts`; `redactForTelemetry` delega en él y no mantiene una política duplicada.
 - Profundidad: objetos y arreglos anidados.
 - Variantes: las claves se comparan sin distinción de mayúsculas, guiones o guiones bajos.
 - Integridad: se construye una copia y no se modifica el objeto recibido.
 - Política: una clave sensible provoca la redacción de su valor completo, incluso si contiene un arreglo u objeto.
 - Verificación: `course-tests/week-04-security.test.ts` y `course-tests/public/week-04.test.ts`.
+
+## Control SC-04-05 — Telemetría y manejo seguro de errores
+
+- Puerto: `TelemetrySink` pertenece al dominio y evita que la aplicación dependa del transporte.
+- Servicio: `ReportTechnicalError` acepta el error externo sólo para marcar el límite; lo descarta y construye un evento mínimo con operación, correlación, estado e intento.
+- Adaptador: `SafeTelemetrySink` aplica `redactTelemetry` inmediatamente antes de entregar cada evento al transporte final.
+- Caminos protegidos: salud del backend, lista de incidencias y detalle de incidencia reportan por el mismo servicio, conservando mensajes generales en la interfaz.
+- Falla de telemetría: no sustituye el resultado original ni expone el error mediante consola.
+- Verificación: `course-tests/week-04-telemetry.test.ts` incluye errores con tokens ficticios y comprueba la salida del transporte.
 
 ## Control SC-04-02 — Exclusión de configuración privada
 
@@ -63,6 +72,7 @@ El comando `npm run test:security:week4` comprueba:
 6. Exclusión de variantes privadas de `.env` y conservación de `.env.example`.
 7. Persistencia y eliminación mediante el puerto seguro de sesión.
 8. Rechazo de una sesión corrupta y ausencia de secretos en el mensaje de error.
+9. Redacción en el transporte final y descarte del error externo en operaciones reales.
 
 ## Limitaciones
 
