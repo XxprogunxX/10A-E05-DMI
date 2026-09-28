@@ -13,6 +13,7 @@
 | 1 | `redactForTelemetry` no tenía implementación | Una integración futura de telemetría no tendría un control común para ocultar credenciales, identidad, ubicación, fotografías o comentarios internos | Se agregó sanitización recursiva, normalización de nombres de campo y copia sin mutación | [Telemetría redactada](evidence/telemetria-redactada.png) |
 | 2 | `.gitignore` sólo ignoraba el nombre exacto `.env` | Variantes habituales como `.env.local` o `.env.production` podían agregarse accidentalmente al repositorio | Se agregó `.env.*` y se conservó explícitamente `.env.example` | [Archivos de entorno ignorados](evidence/archivos-env-ignorados.png) |
 | 3 | El resumen de incidencias incluía la ubicación exacta | La pantalla de consulta general exponía más información operativa de la necesaria | Se retiró `location` de `IncidentSummary` y de la tarjeta de lista; el detalle conserva el dato | [Minimización de ubicación](evidence/ubicacion-minimizada.png) |
+| 4 | No existía un mecanismo persistente seguro para la futura sesión | Guardar tokens en preferencias, archivos o variables públicas expondría credenciales | Se agregó `SessionStorage` con un adaptador de `expo-secure-store` que falla sin degradarse a almacenamiento plano | `course-tests/week-04-session-storage.test.ts` |
 
 ## Hallazgo 1 — Telemetría sin sanitización implementada
 
