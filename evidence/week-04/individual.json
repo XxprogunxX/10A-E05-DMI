@@ -1,182 +1,91 @@
 {
-
   "schemaVersion": 1,
-
   "week": 4,
-
   "teamId": "10A-E05",
-
   "members": [
-
     {
-
       "studentId": "3523110052",
-
       "commitShas": [
-
         "8f0a16a17bf64c71206a4f6520727486286cb32a"
-
       ],
-
       "files": [
-
         ".github/workflows/week-04-seguridad-privacidad-feedback.yml",
-
         "INSTALL.md",
-
         "app.json",
-
         "course-tests/week-04-session-storage.test.ts",
-
         "docs/assignments/week-04-repository.md",
-
         "docs/assignments/week-04-rubric.md",
-
         "docs/assignments/week-04.md",
-
         "docs/security-audit.md",
-
         "docs/security-controls.md",
-
         "package-lock.json",
-
         "package.json",
-
         "src/composition/createAppDependencies.ts",
-
         "src/domain/session/SessionSecrets.ts",
-
         "src/domain/session/SessionStorage.ts",
-
         "src/infrastructure/session/ExpoSecureSessionStorage.ts"
-
       ],
-
       "tests": [
-
         "course-tests/week-04-session-storage.test.ts"
-
       ],
-
       "reviews": [
-
         "Revisión del almacenamiento seguro de sesión y del workflow de Semana 04."
-
       ],
-
       "prediction": "Se esperaba que la sesión persistida dejara de depender de almacenamiento plano y que las pruebas del almacenamiento seguro fueran reproducibles.",
-
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-session-storage.test.ts --verbose",
-
       "observedResult": "Las pruebas de almacenamiento de sesión pasaron durante la validación de Semana 04.",
-
       "explanation": "Javier implementó el almacenamiento seguro de sesión y los controles asociados al workflow de Semana 04."
-
     },
-
     {
-
       "studentId": "3523110137",
-
       "commitShas": [
-
         "a3a91db4d76f917e58426741521b8bf5a296b7fb"
-
       ],
-
       "files": [
-
         "App.tsx",
-
         "course-tests/week-04-telemetry.test.ts",
-
         "docs/security-controls.md",
-
         "package.json",
-
         "src/application/telemetry/ReportTechnicalError.ts",
-
         "src/composition/createAppDependencies.ts",
-
         "src/course-evaluation/index.ts",
-
         "src/domain/telemetry/TelemetrySink.ts",
-
         "src/domain/telemetry/redactTelemetry.ts",
-
         "src/infrastructure/telemetry/SafeTelemetrySink.ts",
-
         "src/ui/screens/IncidentDetailScreen.tsx",
-
         "src/ui/screens/IncidentListScreen.tsx"
-
       ],
-
       "tests": [
-
         "course-tests/week-04-telemetry.test.ts"
-
       ],
-
       "reviews": [
-
         "Revisión de redacción de telemetría y del sink seguro."
-
       ],
-
       "prediction": "Se esperaba que los eventos de telemetría eliminaran credenciales, datos privados y ubicación antes de enviarse al transporte final.",
-
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-telemetry.test.ts --verbose",
-
       "observedResult": "Las pruebas de telemetría pasaron durante la validación de Semana 04.",
-
       "explanation": "Francisco implementó la telemetría segura, la redacción de datos sensibles y su integración en los flujos de incidencias."
-
     },
-
     {
-
       "studentId": "3515110194",
-
       "commitShas": [
-
-        "9023537d03c42f00137d2275afa612d58d3a0ba2"
-
+        "df61139386abd74281ec9a24dd13634babd656f1"
       ],
-
       "files": [
-
         "course-tests/week-04-delivery.test.ts",
-
         "package-lock.json",
-
         "package.json"
-
       ],
-
       "tests": [
-
         "course-tests/week-04-delivery.test.ts"
-
       ],
-
       "reviews": [
-
         "Revisión de workflow, dependencia SecureStore, ausencia de bypass y activación de pruebas de seguridad."
-
       ],
-
       "prediction": "Se esperaba que la evidencia de delivery detectara cambios que debilitaran los controles de seguridad y mantuviera activas las pruebas de Semana 04.",
-
       "command": "npm run test:security:week4",
-
       "observedResult": "5 suites passed; 26 tests passed.",
-
       "explanation": "Carlos agregó la prueba de delivery, integró su ejecución en el script de seguridad y validó el toolchain técnico de Semana 04."
-
     }
-
   ]
-
 }
-
