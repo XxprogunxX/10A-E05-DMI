@@ -25,6 +25,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
           fetch-tags: true
+      - name: Fetch final tags
+        run: git fetch --force --tags origin
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
