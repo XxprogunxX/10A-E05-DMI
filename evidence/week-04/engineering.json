@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "commitSha": "4fc152dd81c443dc8f10f58e5b3ac6fec2d6397f",
+  "decision": "Se seleccionó expo-secure-store para persistir secretos pequeños de sesión mediante los mecanismos seguros del sistema operativo móvil, evitando almacenamiento plano de la sesión.",
+  "alternatives": [
+    "AsyncStorage: almacenamiento persistente de aplicación que no ofrece el mismo objetivo de protección para secretos de sesión.",
+    "Memoria únicamente: reduce la persistencia de secretos, pero no conserva la sesión después de reiniciar la aplicación.",
+    "JSON o preferencias de aplicación: permiten persistencia, pero no proporcionan un mecanismo equivalente de almacenamiento seguro para secretos."
+  ],
+  "tradeoff": "SecureStore mejora la protección de secretos pequeños mediante Android Keystore e iOS Keychain, pero introduce dependencia del almacenamiento seguro del dispositivo y no sustituye expiración, rotación, revocación ni autenticación.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm run test:security:week4",
+      "result": "5 suites passed; 26 tests passed.",
+      "evidence": "Las pruebas de seguridad de Semana 04, incluyendo almacenamiento seguro, telemetría, delivery y prueba pública, pasaron."
+    },
+    {
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "result": "3 test suites passed; 20 tests passed; 0 failed.",
+      "evidence": "Las pruebas negativas de seguridad, almacenamiento de sesión y telemetría pasaron sin fallos."
+    }
+  ]
+}

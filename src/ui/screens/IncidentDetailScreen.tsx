@@ -12,17 +12,20 @@ import type {
   GetIncidentDetail,
   IncidentDetail,
 } from '../../application/incidents/GetIncidentDetail';
+import type { ReportTechnicalError } from '../../application/telemetry/ReportTechnicalError';
 
 interface Props {
   readonly getIncidentDetail: GetIncidentDetail;
   readonly incidentId: string;
   readonly onBack: () => void;
+  readonly reportTechnicalError: ReportTechnicalError;
 }
 
 export function IncidentDetailScreen({
   getIncidentDetail,
   incidentId,
   onBack,
+  reportTechnicalError,
 }: Props) {
   const [incident, setIncident] = useState<IncidentDetail | null>(null);
   const [state, setState] = useState<
@@ -39,12 +42,24 @@ export function IncidentDetailScreen({
           setState(result ? 'ready' : 'not-found');
         }
       })
-      .catch(() => active && setState('error'));
+      .catch((error: unknown) => {
+        reportTechnicalError.execute(
+          {
+            operation: 'load-incident-detail',
+            correlationId: 'corr-synthetic-detail-001',
+            attempt: 1,
+          },
+          error,
+        );
+        if (active) {
+          setState('error');
+        }
+      });
 
     return () => {
       active = false;
     };
-  }, [getIncidentDetail, incidentId]);
+  }, [getIncidentDetail, incidentId, reportTechnicalError]);
 
   if (state === 'loading') {
     return (

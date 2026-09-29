@@ -20,11 +20,23 @@ export default function App() {
     let active = true;
     getBackendHealth()
       .then(() => active && setStatus('available'))
-      .catch(() => active && setStatus('offline'));
+      .catch((error: unknown) => {
+        dependencies.reportTechnicalError.execute(
+          {
+            operation: 'check-backend-health',
+            correlationId: 'corr-synthetic-health-001',
+            attempt: 1,
+          },
+          error,
+        );
+        if (active) {
+          setStatus('offline');
+        }
+      });
     return () => {
       active = false;
     };
-  }, []);
+  }, [dependencies.reportTechnicalError]);
 
   return (
     <View style={styles.screen}>
@@ -37,12 +49,14 @@ export default function App() {
         <IncidentListScreen
           listIncidents={dependencies.listIncidents}
           onSelectIncident={setSelectedIncidentId}
+          reportTechnicalError={dependencies.reportTechnicalError}
         />
       ) : (
         <IncidentDetailScreen
           getIncidentDetail={dependencies.getIncidentDetail}
           incidentId={selectedIncidentId}
           onBack={() => setSelectedIncidentId(null)}
+          reportTechnicalError={dependencies.reportTechnicalError}
         />
       )}
       <StatusBar style="auto" />

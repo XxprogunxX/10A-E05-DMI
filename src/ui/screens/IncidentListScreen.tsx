@@ -12,10 +12,12 @@ import type {
   IncidentSummary,
   ListIncidents,
 } from '../../application/incidents/ListIncidents';
+import type { ReportTechnicalError } from '../../application/telemetry/ReportTechnicalError';
 
 interface Props {
   readonly listIncidents: ListIncidents;
   readonly onSelectIncident: (id: string) => void;
+  readonly reportTechnicalError: ReportTechnicalError;
 }
 
 const statusLabels: Record<IncidentSummary['status'], string> = {
@@ -26,7 +28,11 @@ const statusLabels: Record<IncidentSummary['status'], string> = {
   closed: 'Cerrada',
 };
 
-export function IncidentListScreen({ listIncidents, onSelectIncident }: Props) {
+export function IncidentListScreen({
+  listIncidents,
+  onSelectIncident,
+  reportTechnicalError,
+}: Props) {
   const [incidents, setIncidents] = useState<readonly IncidentSummary[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -40,12 +46,24 @@ export function IncidentListScreen({ listIncidents, onSelectIncident }: Props) {
           setState('ready');
         }
       })
-      .catch(() => active && setState('error'));
+      .catch((error: unknown) => {
+        reportTechnicalError.execute(
+          {
+            operation: 'load-incidents',
+            correlationId: 'corr-synthetic-list-001',
+            attempt: 1,
+          },
+          error,
+        );
+        if (active) {
+          setState('error');
+        }
+      });
 
     return () => {
       active = false;
     };
-  }, [listIncidents]);
+  }, [listIncidents, reportTechnicalError]);
 
   if (state === 'loading') {
     return (
@@ -85,9 +103,7 @@ export function IncidentListScreen({ listIncidents, onSelectIncident }: Props) {
             <Text style={styles.cardTitle}>{incident.title}</Text>
             <Text style={styles.badge}>{statusLabels[incident.status]}</Text>
           </View>
-          <Text>
-            {incident.category} · {incident.location}
-          </Text>
+          <Text>{incident.category}</Text>
           <Text style={styles.identifier}>
             {incident.id} · Prioridad {incident.priority}
           </Text>

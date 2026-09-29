@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "commitSha": "4fc152dd81c443dc8f10f58e5b3ac6fec2d6397f",
+  "generatedAt": "2026-09-29T01:01:15.291648+00:00",
+  "checks": [
+    {
+      "id": "nested-redaction",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "La prueba de redacción de objetos anidados pasó."
+    },
+    {
+      "id": "list-redaction",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "La prueba de redacción de información sensible dentro de listas pasó."
+    },
+    {
+      "id": "input-immutability",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "La prueba confirmó que la redacción no modifica el objeto de entrada."
+    },
+    {
+      "id": "fake-token-error",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "La prueba confirmó que los tokens de acceso y renovación no aparecen en el error."
+    },
+    {
+      "id": "session-secure-store",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "La sesión se almacena y restaura mediante el controlador seguro."
+    },
+    {
+      "id": "corrupt-session-removed",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "Una sesión persistida inválida se elimina en lugar de devolverse."
+    },
+    {
+      "id": "error-no-secret-leak",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "El fallo controlado no expone el valor secreto almacenado."
+    },
+    {
+      "id": "location-redaction",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "La redacción elimina ubicación y coordenadas."
+    },
+    {
+      "id": "safe-telemetry",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+      "evidence": "El sink seguro sanitiza el evento antes del transporte final."
+    },
+    {
+      "id": "real-incident-safe-context",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:security:week4",
+      "evidence": "La operación real de incidencia reporta únicamente contexto seguro cuando ocurre un fallo."
+    },
+    {
+      "id": "real-paths-backend",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:smoke -- --verbose",
+      "evidence": "La prueba smoke reprodujo el baseline y resolvió el estado del backend."
+    },
+    {
+      "id": "real-paths-list-detail",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:smoke -- --verbose",
+      "evidence": "La prueba smoke abrió la lista determinista y el detalle de una incidencia."
+    }
+  ]
+}
