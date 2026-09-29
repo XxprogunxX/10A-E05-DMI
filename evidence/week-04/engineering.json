@@ -1,31 +1,62 @@
 {
+
   "schemaVersion": 1,
+
   "week": 4,
-  "commitSha": "df61139386abd74281ec9a24dd13634babd656f1",
-  "decision": "Se seleccion? expo-secure-store para persistir secretos peque?os de sesi?n mediante los mecanismos seguros del sistema operativo m?vil, evitando almacenamiento plano de la sesi?n.",
+
+  "commitSha": "9023537d03c42f00137d2275afa612d58d3a0ba2",
+
+  "decision": "Se seleccionó expo-secure-store para persistir secretos pequeños de sesión mediante los mecanismos seguros del sistema operativo móvil, evitando almacenamiento plano de la sesión.",
+
   "alternatives": [
-    "AsyncStorage: almacenamiento persistente de aplicaci?n que no ofrece el mismo objetivo de protecci?n para secretos de sesi?n.",
-    "Memoria ?nicamente: reduce la persistencia de secretos, pero no conserva la sesi?n despu?s de reiniciar la aplicaci?n.",
-    "JSON o preferencias de aplicaci?n: permiten persistencia, pero no proporcionan un mecanismo equivalente de almacenamiento seguro para secretos."
+
+    "AsyncStorage: almacenamiento persistente de aplicación que no ofrece el mismo objetivo de protección para secretos de sesión.",
+
+    "Memoria únicamente: reduce la persistencia de secretos, pero no conserva la sesión después de reiniciar la aplicación.",
+
+    "JSON o preferencias de aplicación: permiten persistencia, pero no proporcionan un mecanismo equivalente de almacenamiento seguro para secretos."
+
   ],
-  "tradeoff": "SecureStore mejora la protecci?n de secretos peque?os mediante Android Keystore e iOS Keychain, pero introduce dependencia del almacenamiento seguro del dispositivo y no sustituye expiraci?n, rotaci?n, revocaci?n ni autenticaci?n.",
+
+  "tradeoff": "SecureStore mejora la protección de secretos pequeños mediante Android Keystore e iOS Keychain, pero introduce dependencia del almacenamiento seguro del dispositivo y no sustituye expiración, rotación, revocación ni autenticación.",
+
   "requirementIds": [
+
     "AC-01",
+
     "AC-02",
+
     "AC-03",
+
     "AC-04",
+
     "AC-05"
+
   ],
+
   "verification": [
+
     {
+
       "command": "npm run test:security:week4",
+
       "result": "5 suites passed; 26 tests passed.",
-      "evidence": "Las pruebas de seguridad de Semana 04, incluyendo almacenamiento seguro, telemetr?a, delivery y prueba p?blica, pasaron."
+
+      "evidence": "Las pruebas de seguridad de Semana 04, incluyendo almacenamiento seguro, telemetría, delivery y prueba pública, pasaron."
+
     },
+
     {
+
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
+
       "result": "3 test suites passed; 20 tests passed; 0 failed.",
-      "evidence": "Las pruebas negativas de seguridad, almacenamiento de sesi?n y telemetr?a pasaron sin fallos."
+
+      "evidence": "Las pruebas negativas de seguridad, almacenamiento de sesión y telemetría pasaron sin fallos."
+
     }
+
   ]
+
 }
+

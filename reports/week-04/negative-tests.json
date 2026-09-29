@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 4,
-  "commitSha": "df61139386abd74281ec9a24dd13634babd656f1",
+  "commitSha": "9023537d03c42f00137d2275afa612d58d3a0ba2",
   "generatedAt": "2026-09-29T01:01:15.291648+00:00",
   "checks": [
     {
@@ -9,42 +9,42 @@
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "La prueba de redacci?n de objetos anidados pas?."
+      "evidence": "La prueba de redacción de objetos anidados pasó."
     },
     {
       "id": "list-redaction",
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "La prueba de redacci?n de informaci?n sensible dentro de listas pas?."
+      "evidence": "La prueba de redacción de información sensible dentro de listas pasó."
     },
     {
       "id": "input-immutability",
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "La prueba confirm? que la redacci?n no modifica el objeto de entrada."
+      "evidence": "La prueba confirmó que la redacción no modifica el objeto de entrada."
     },
     {
       "id": "fake-token-error",
       "status": "pass",
       "scenarioType": "failure",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "La prueba confirm? que los tokens de acceso y renovaci?n no aparecen en el error."
+      "evidence": "La prueba confirmó que los tokens de acceso y renovación no aparecen en el error."
     },
     {
       "id": "session-secure-store",
       "status": "pass",
       "scenarioType": "nominal",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "La sesi?n se almacena y restaura mediante el controlador seguro."
+      "evidence": "La sesión se almacena y restaura mediante el controlador seguro."
     },
     {
       "id": "corrupt-session-removed",
       "status": "pass",
       "scenarioType": "failure",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "Una sesi?n persistida inv?lida se elimina en lugar de devolverse."
+      "evidence": "Una sesión persistida inválida se elimina en lugar de devolverse."
     },
     {
       "id": "error-no-secret-leak",
@@ -58,7 +58,7 @@
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npx jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/week-04-security.test.ts course-tests/week-04-session-storage.test.ts course-tests/week-04-telemetry.test.ts --verbose",
-      "evidence": "La redacci?n elimina ubicaci?n y coordenadas."
+      "evidence": "La redacción elimina ubicación y coordenadas."
     },
     {
       "id": "safe-telemetry",
@@ -71,22 +71,22 @@
       "id": "real-incident-safe-context",
       "status": "pass",
       "scenarioType": "failure",
-      "command": "npm run test:smoke -- --verbose",
-      "evidence": "La operaci?n real de incidencia reporta ?nicamente contexto seguro cuando ocurre un fallo."
+      "command": "npm run test:security:week4",
+      "evidence": "La operación real de incidencia reporta únicamente contexto seguro cuando ocurre un fallo."
     },
     {
       "id": "real-paths-backend",
       "status": "pass",
       "scenarioType": "nominal",
       "command": "npm run test:smoke -- --verbose",
-      "evidence": "La prueba smoke reprodujo el baseline y resolvi? el estado del backend."
+      "evidence": "La prueba smoke reprodujo el baseline y resolvió el estado del backend."
     },
     {
       "id": "real-paths-list-detail",
       "status": "pass",
       "scenarioType": "nominal",
       "command": "npm run test:smoke -- --verbose",
-      "evidence": "La prueba smoke abri? la lista determinista y el detalle de una incidencia."
+      "evidence": "La prueba smoke abrió la lista determinista y el detalle de una incidencia."
     }
   ]
 }
