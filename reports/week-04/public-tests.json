@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "mode": "public",
+  "commitSha": "df61139386abd74281ec9a24dd13634babd656f1",
+  "evaluatedAt": "2026-09-29T01:01:40.374490+00:00",
+  "status": "pass",
+  "checks": [
+    {
+      "id": "base_files",
+      "status": "pass",
+      "detail": "missing=[]"
+    },
+    {
+      "id": "react_native_profile",
+      "status": "pass",
+      "detail": "missing packages=[]"
+    },
+    {
+      "id": "toolchain_scripts",
+      "status": "pass",
+      "detail": "missing scripts=[]"
+    },
+    {
+      "id": "workflow_integrity",
+      "status": "pass",
+      "detail": "bypass markers=[]"
+    },
+    {
+      "id": "secret_scan",
+      "status": "pass",
+      "detail": "hits=[]"
+    },
+    {
+      "id": "required_evidence",
+      "status": "pass",
+      "detail": "missing/empty=[]"
+    },
+    {
+      "id": "schema:reports/week-04/secret-scan.json",
+      "status": "pass",
+      "detail": "2 checks indexed, 2 boundary/failure; report evaluates HEAD"
+    },
+    {
+      "id": "schema:reports/week-04/negative-tests.json",
+      "status": "pass",
+      "detail": "12 checks indexed, 9 boundary/failure; report evaluates HEAD"
+    },
+    {
+      "id": "schema:evidence/week-04/engineering.json",
+      "status": "pass",
+      "detail": "decision evidence is substantive and reproducible; report evaluates HEAD"
+    },
+    {
+      "id": "schema:evidence/week-04/individual.json",
+      "status": "pass",
+      "detail": "three individual evidence records found"
+    }
+  ]
+}
