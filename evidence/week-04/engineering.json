@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 4,
-  "commitSha": "4fc152dd81c443dc8f10f58e5b3ac6fec2d6397f",
+  "commitSha": "e7f0bb55ea2a07f001fa907d39c70b909d3bd089",
   "decision": "Se seleccionó expo-secure-store para persistir secretos pequeños de sesión mediante los mecanismos seguros del sistema operativo móvil, evitando almacenamiento plano de la sesión.",
   "alternatives": [
     "AsyncStorage: almacenamiento persistente de aplicación que no ofrece el mismo objetivo de protección para secretos de sesión.",
