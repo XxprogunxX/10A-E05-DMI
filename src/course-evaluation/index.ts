@@ -8,6 +8,7 @@ import type {
 } from './contracts';
 import type { IncidentLocation } from '../campusops/contracts';
 import { redactTelemetry } from '../domain/telemetry/redactTelemetry';
+import { parseRemoteResource as parseRemoteResourceAtBoundary } from '../infrastructure/remote/parseRemoteResource';
 
 function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
@@ -17,8 +18,8 @@ export function redactForTelemetry(input: unknown): unknown {
   return redactTelemetry(input);
 }
 
-export function parseRemoteResource(_input: unknown): ParseResult {
-  return pending('parseRemoteResource');
+export function parseRemoteResource(input: unknown): ParseResult {
+  return parseRemoteResourceAtBoundary(input);
 }
 
 export function coordinateRefresh(_events: readonly AuthEvent[]): Readonly<{
