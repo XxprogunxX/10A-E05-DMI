@@ -1,7 +1,8 @@
-import type {
-  CloudIncident,
-  CreatedIncident,
-  CreateIncidentInput,
+import {
+  INCIDENT_CATEGORIES,
+  type CloudIncident,
+  type CreatedIncident,
+  type CreateIncidentInput,
 } from '../../domain/incidents/CloudIncident';
 import type {
   HttpRequest,
@@ -42,6 +43,22 @@ const DEFAULT_TIMEOUT_MS = 1_000;
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonemptyText(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidCreateInput(input: CreateIncidentInput): boolean {
+  return (
+    INCIDENT_CATEGORIES.some((category) => category === input.category) &&
+    isNonemptyText(input.description) &&
+    isNonemptyText(input.location)
+  );
+}
+
+function isValidIdempotencyKey(value: string): boolean {
+  return value.trim().length >= 8;
 }
 
 function parseJson(
@@ -98,11 +115,13 @@ export class IncidentApiClient {
     }
 
     const incidents: CloudIncident[] = [];
+    let hasEmptyPayload = false;
     for (const item of decoded.value.items) {
       const parsed = parseIncidentResource(item);
       if (!parsed.ok) {
         if (parsed.error === 'empty_payload') {
-          return { kind: 'empty_payload' };
+          hasEmptyPayload = true;
+          continue;
         }
         return {
           kind: 'failure',
@@ -110,6 +129,10 @@ export class IncidentApiClient {
         };
       }
       incidents.push(parsed.value);
+    }
+
+    if (hasEmptyPayload) {
+      return { kind: 'empty_payload' };
     }
 
     return { kind: 'available', value: incidents };
@@ -134,6 +157,13 @@ export class IncidentApiClient {
     input: CreateIncidentInput,
     idempotencyKey: string,
   ): Promise<IncidentClientResult<CreatedIncident>> {
+    if (
+      !isValidCreateInput(input) ||
+      !isValidIdempotencyKey(idempotencyKey)
+    ) {
+      return { kind: 'failure', error: { kind: 'invalid_payload' } };
+    }
+
     const response = await this.request({
       url: `${this.baseUrl}/v1/incidents`,
       method: 'POST',

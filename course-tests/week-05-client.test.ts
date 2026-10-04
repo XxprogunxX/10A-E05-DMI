@@ -133,6 +133,31 @@ test('keeps a valid null payload distinct from an invalid contract', async () =>
   });
 });
 
+test('validates later list items after finding a nullable resource', async () => {
+  const nullable = {
+    id: 'campus-inc-nullable',
+    version: 1,
+    status: 'open',
+    payload: null,
+  };
+  const malformed = {
+    id: 'campus-inc-malformed',
+    version: 'not-a-number',
+    status: 'open',
+    payload: {},
+  };
+  const client = clientFor(
+    new StubHttpTransport([
+      jsonResponse({ items: [nullable, malformed] }),
+    ]),
+  );
+
+  await expect(client.listIncidents()).resolves.toEqual({
+    kind: 'failure',
+    error: { kind: 'contract' },
+  });
+});
+
 test('encodes the detail identifier as a URL segment', async () => {
   const transport = new StubHttpTransport([jsonResponse(remoteIncident)]);
 
@@ -330,6 +355,45 @@ test('creates an incident with the required stable request contract', async () =
     });
   }
 });
+
+const invalidCreateCases: readonly (readonly [
+  string,
+  CreateIncidentInput,
+  string,
+])[] = [
+  [
+    'category',
+    { ...createInput, category: 'unknown' as CreateIncidentInput['category'] },
+    'clave-estable-de-prueba',
+  ],
+  [
+    'description',
+    { ...createInput, description: '   ' },
+    'clave-estable-de-prueba',
+  ],
+  [
+    'location',
+    { ...createInput, location: '' },
+    'clave-estable-de-prueba',
+  ],
+  ['idempotency key', createInput, 'short'],
+];
+
+test.each(invalidCreateCases)(
+  'rejects an invalid create %s without calling the transport',
+  async (_field, input, idempotencyKey) => {
+    const transport = new StubHttpTransport([]);
+    const client = clientFor(transport);
+
+    await expect(
+      client.createIncident(input, idempotencyKey),
+    ).resolves.toEqual({
+      kind: 'failure',
+      error: { kind: 'invalid_payload' },
+    });
+    expect(transport.requests).toEqual([]);
+  },
+);
 
 test('rejects a creation response with a mismatched operation identifier', async () => {
   const client = clientFor(
