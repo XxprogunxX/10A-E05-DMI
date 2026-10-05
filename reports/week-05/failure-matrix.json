@@ -1,0 +1,71 @@
+{
+    "schemaVersion":  1,
+    "week":  5,
+    "commitSha":  "4cffda38d05c564c91b88c2cd53417a72ac04d65",
+    "generatedAt":  "2026-10-05T01:40:12.0700121Z",
+    "checks":  [
+                   {
+                       "id":  "client-timeout",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "El timeout y la cancelacion por AbortSignal producen un fallo seguro y controlado."
+                   },
+                   {
+                       "id":  "client-http-500",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "Una respuesta HTTP 500 es convertida en un resultado de error controlado sin filtrar datos sensibles."
+                   },
+                   {
+                       "id":  "client-network-error",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "Un fallo de red produce un error seguro y observable para la capa de aplicacion."
+                   },
+                   {
+                       "id":  "client-malformed-json",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "JSON malformado no provoca una excepcion sin controlar y es tratado como respuesta invalida."
+                   },
+                   {
+                       "id":  "client-invalid-envelope",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "Un envelope remoto invalido es rechazado antes de entrar al dominio."
+                   },
+                   {
+                       "id":  "client-invalid-create-input",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "Las entradas invalidas para crear incidencias son rechazadas antes de realizar una operacion remota."
+                   },
+                   {
+                       "id":  "client-idempotency",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "La creacion mantiene un operationId estable y las pruebas verifican el comportamiento idempotente."
+                   },
+                   {
+                       "id":  "client-url-encoding",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm run test:client:week5",
+                       "evidence":  "Los segmentos de URL se codifican correctamente antes de ser enviados al backend."
+                   },
+                   {
+                       "id":  "integration-real-backend",
+                       "status":  "pass",
+                       "scenarioType":  "nominal",
+                       "command":  "npm test -- --runInBand course-tests/week-05-integration.test.ts",
+                       "evidence":  "1 suite y 3 pruebas pasaron contra el backend real: listado, detalle existente y creacion con idempotencia."
+                   }
+               ]
+}

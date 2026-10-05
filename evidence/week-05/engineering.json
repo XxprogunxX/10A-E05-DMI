@@ -1,0 +1,56 @@
+{
+    "schemaVersion":  1,
+    "week":  5,
+    "commitSha":  "4cffda38d05c564c91b88c2cd53417a72ac04d65",
+    "decision":  "Integrar el backend CampusOps mediante un cliente HTTP y un repositorio remoto dentro de infrastructure, dejando los casos de uso de application y las pantallas de UI desacoplados del transporte concreto. El cliente valida DTOs y respuestas remotas antes de exponer datos al dominio, y las operaciones de creacion conservan un operationId estable para soportar idempotencia.",
+    "alternatives":  [
+                         "Consumir fetch directamente desde las pantallas de UI. Se descarta porque acoplaria la interfaz con HTTP, dificultaria las pruebas y rompería la separacion UI -\u003e application -\u003e domain \u003c- infrastructure.",
+                         "Mantener datos simulados en memoria y no conectar el cliente al backend real. Se descarta porque no demuestra la integracion cloud exigida en Semana 5 ni permite verificar errores HTTP, red, JSON y contrato remoto reales.",
+                         "Colocar toda la validacion dentro de las pantallas. Se descarta porque duplicaria reglas, mezclaria responsabilidades y dificultaria comprobar de forma aislada la frontera remota."
+                     ],
+    "tradeoff":  "La solucion agrega tipos, casos de uso, repositorio remoto, validacion y pruebas, por lo que requiere mas estructura que un fetch directo. A cambio, conserva la arquitectura existente, permite probar fallos de transporte y contrato de manera determinista, evita exponer DTOs no validados al dominio y hace verificable la idempotencia.",
+    "requirementIds":  [
+                           "AC-01",
+                           "AC-02",
+                           "AC-03",
+                           "AC-04",
+                           "AC-05"
+                       ],
+    "verification":  [
+                         {
+                             "command":  "npm run test:contract:week5",
+                             "result":  "PASS",
+                             "evidence":  "3 suites y 41 tests pasaron."
+                         },
+                         {
+                             "command":  "npm run test:client:week5",
+                             "result":  "PASS",
+                             "evidence":  "1 suite y 25 tests pasaron, incluyendo timeout, AbortSignal, HTTP 500, red, JSON malformado, payload invalido e idempotencia."
+                         },
+                         {
+                             "command":  "npm test -- --runInBand course-tests/week-05-integration.test.ts",
+                             "result":  "PASS",
+                             "evidence":  "1 suite y 3 pruebas pasaron contra el backend real."
+                         },
+                         {
+                             "command":  "npm run test:architecture",
+                             "result":  "PASS",
+                             "evidence":  "39 imports inspeccionados; 0 dependencias prohibidas."
+                         },
+                         {
+                             "command":  "npm run typecheck",
+                             "result":  "PASS",
+                             "evidence":  "TypeScript finalizo correctamente sin errores."
+                         },
+                         {
+                             "command":  "npm run lint",
+                             "result":  "PASS",
+                             "evidence":  "Lint finalizo correctamente sin errores."
+                         },
+                         {
+                             "command":  "npm run backend:self-test",
+                             "result":  "PASS",
+                             "evidence":  "CampusOps backend contracts: roles, reassignment conflict, lost response, idempotency, evidence and geocoding PASS."
+                         }
+                     ]
+}

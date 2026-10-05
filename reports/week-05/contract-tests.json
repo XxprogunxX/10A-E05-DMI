@@ -1,0 +1,36 @@
+{
+    "schemaVersion":  1,
+    "week":  5,
+    "commitSha":  "4cffda38d05c564c91b88c2cd53417a72ac04d65",
+    "generatedAt":  "2026-10-05T01:40:12.0700121Z",
+    "checks":  [
+                   {
+                       "id":  "contract-valid-response",
+                       "status":  "pass",
+                       "scenarioType":  "nominal",
+                       "command":  "npm run test:contract:week5",
+                       "evidence":  "3 suites y 41 tests pasaron; el contrato remoto valido fue aceptado."
+                   },
+                   {
+                       "id":  "contract-null-payload",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm run test:contract:week5",
+                       "evidence":  "El contrato contempla payload nulo sin producir un incidente valido fuera del esquema."
+                   },
+                   {
+                       "id":  "contract-malformed-payload",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm run test:contract:week5",
+                       "evidence":  "Las respuestas malformadas o incompatibles son rechazadas por la frontera de infraestructura."
+                   },
+                   {
+                       "id":  "contract-invalid-incident-fields",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm run test:contract:week5",
+                       "evidence":  "Los campos de incidente que no cumplen el contrato remoto son rechazados."
+                   }
+               ]
+}

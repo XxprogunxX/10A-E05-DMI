@@ -1,29 +1,62 @@
 import type {
   CloudIncident,
-  CreatedIncident,
   CreateIncidentInput,
+  CreatedIncident,
 } from '../../domain/incidents/CloudIncident';
+import type {
+  CloudIncidentFailure,
+  CloudIncidentRepository,
+  CloudIncidentResult,
+} from '../../domain/incidents/CloudIncidentRepository';
 import {
+  type IncidentClientFailure,
   type IncidentClientResult,
   IncidentApiClient,
 } from './IncidentApiClient';
 
+function mapFailure(error: IncidentClientFailure): CloudIncidentFailure {
+  return error;
+}
+
+function mapResult<T>(
+  result: IncidentClientResult<T>,
+): CloudIncidentResult<T> {
+  if (result.kind === 'available') {
+    return result;
+  }
+
+  if (result.kind === 'empty_payload') {
+    return result;
+  }
+
+  return {
+    kind: 'failure',
+    error: mapFailure(result.error),
+  };
+}
+
 /** Remote gateway kept separate from UI and application presentation models. */
-export class RemoteIncidentRepository {
+export class RemoteIncidentRepository implements CloudIncidentRepository {
   constructor(private readonly client: IncidentApiClient) {}
 
-  list(): Promise<IncidentClientResult<readonly CloudIncident[]>> {
-    return this.client.listIncidents();
+  async list(): Promise<
+    CloudIncidentResult<readonly CloudIncident[]>
+  > {
+    return mapResult(await this.client.listIncidents());
   }
 
-  getById(id: string): Promise<IncidentClientResult<CloudIncident>> {
-    return this.client.getIncidentDetail(id);
+  async getById(
+    id: string,
+  ): Promise<CloudIncidentResult<CloudIncident>> {
+    return mapResult(await this.client.getIncidentDetail(id));
   }
 
-  create(
+  async create(
     input: CreateIncidentInput,
     idempotencyKey: string,
-  ): Promise<IncidentClientResult<CreatedIncident>> {
-    return this.client.createIncident(input, idempotencyKey);
+  ): Promise<CloudIncidentResult<CreatedIncident>> {
+    return mapResult(
+      await this.client.createIncident(input, idempotencyKey),
+    );
   }
 }
