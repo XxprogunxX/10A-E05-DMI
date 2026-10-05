@@ -48,10 +48,12 @@
     "jest-expo": "57.0.4",
     "prettier": "3.9.6",
     "react-test-renderer": "19.2.3",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "undici": "^7.30.0"
   },
   "jest": {
     "preset": "jest-expo",
+    "setupFiles": ["<rootDir>/course-tests/jest-fetch-setup.cjs"],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/course-tests/hidden/"

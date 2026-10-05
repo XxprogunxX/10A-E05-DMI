@@ -29,17 +29,17 @@ test('opens the deterministic incident list and detail', async () => {
   const view = await render(<App />);
 
   await waitFor(() =>
-    expect(view.getByTestId('incident-INC-002')).toBeTruthy(),
+    expect(view.getByTestId('incident-campus-inc-001')).toBeTruthy(),
   );
-  await act(async () => fireEvent.press(view.getByTestId('incident-INC-002')));
+  await act(async () => fireEvent.press(view.getByTestId('incident-campus-inc-001')));
 
   await waitFor(() =>
     expect(view.getByTestId('incident-detail-screen')).toBeTruthy(),
   );
-  expect(view.getByText('Fuga en bebedero')).toBeTruthy();
+  expect(view.getByText('Sin conexión en laboratorio ficticio')).toBeTruthy();
   expect(
     view.getByText(
-      'El bebedero mantiene un goteo constante y moja el pasillo.',
+      'Sin conexión en laboratorio ficticio',
     ),
   ).toBeTruthy();
 
