@@ -57,7 +57,8 @@
                     {
                         "studentId":  "3515110194",
                         "commitShas":  [
-                                           "340c2810c1dbb8faf258edcbe76e65e05da6195c"
+                                           "340c2810c1dbb8faf258edcbe76e65e05da6195c",
+                                           "4cffda38d05c564c91b88c2cd53417a72ac04d65"
                                        ],
                         "files":  [
                                       "App.tsx",
@@ -85,7 +86,7 @@
                         "prediction":  "Con los casos de uso conectados al repositorio remoto y las pantallas consumiendo application, la aplicacion deberia listar, consultar y crear incidencias reales sin acoplar la UI al transporte HTTP.",
                         "command":  "npm test -- --runInBand course-tests/week-05-integration.test.ts",
                         "observedResult":  "1 suite y 3 pruebas pasaron contra el backend real: listado, detalle existente y creacion con idempotencia.",
-                        "explanation":  "Carlos integro las capas de application, composition y UI con el repositorio remoto existente y agrego la prueba de integracion contra CampusOps para comprobar el flujo completo."
+                        "explanation":  "Carlos integro las capas de application, composition y UI con el repositorio remoto existente y agrego la prueba de integracion contra CampusOps para comprobar el flujo completo. En 4cffda38d05c564c91b88c2cd53417a72ac04d65 corrigio el smoke con respuestas controladas, retiro el fetch global de undici, automatizo el backend local de integracion y agrego las opciones de checkout solicitadas."
                     }
                 ]
 }
