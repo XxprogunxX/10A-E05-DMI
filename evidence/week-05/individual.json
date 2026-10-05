@@ -1,0 +1,91 @@
+{
+    "schemaVersion":  1,
+    "week":  5,
+    "teamId":  "10A-E05",
+    "members":  [
+                    {
+                        "studentId":  "3523110052",
+                        "commitShas":  [
+                                           "e97b7c754cb1bb02904f98155273286c4c26f260"
+                                       ],
+                        "files":  [
+                                      ".github/workflows/week-05-cliente-cloud-feedback.yml",
+                                      "course-tests/week-05-contract.test.ts",
+                                      "docs/api-contract.md",
+                                      "docs/assignments/week-05-repository.md",
+                                      "docs/assignments/week-05-rubric.md",
+                                      "docs/assignments/week-05.md",
+                                      "src/course-evaluation/index.ts",
+                                      "src/infrastructure/remote/parseRemoteResource.ts"
+                                  ],
+                        "tests":  [
+                                      "course-tests/week-05-contract.test.ts"
+                                  ],
+                        "reviews":  [
+                                        "Validacion del contrato remoto de Semana 5 y preparacion de la base de integracion."
+                                    ],
+                        "prediction":  "La validacion temprana del contrato remoto deberia impedir que respuestas incompatibles lleguen al dominio y reducir errores posteriores en la integracion.",
+                        "command":  "npm run test:contract:week5",
+                        "observedResult":  "Las pruebas de contrato pasaron y posteriormente fueron integradas con las pruebas del cliente y del backend real.",
+                        "explanation":  "Javier establecio la base contractual y los mecanismos de evaluacion que permitieron comprobar la forma de las respuestas remotas antes de completar la integracion del cliente."
+                    },
+                    {
+                        "studentId":  "3523110137",
+                        "commitShas":  [
+                                           "d18d0f461ab588546fe7cdd3bedc24dfec44e5ac",
+                                           "c185f6f3774beef23985dfd255c2f15e00d58e51"
+                                       ],
+                        "files":  [
+                                      "course-tests/week-05-client.test.ts",
+                                      "src/domain/incidents/CloudIncident.ts",
+                                      "src/infrastructure/http/HttpTransport.ts",
+                                      "src/infrastructure/incidents/IncidentApiClient.ts",
+                                      "src/infrastructure/incidents/IncidentDto.ts",
+                                      "src/infrastructure/incidents/RemoteIncidentRepository.ts"
+                                  ],
+                        "tests":  [
+                                      "course-tests/week-05-client.test.ts"
+                                  ],
+                        "reviews":  [
+                                        "Validacion del cliente HTTP, DTO y repositorio remoto."
+                                    ],
+                        "prediction":  "Una frontera HTTP centralizada con DTOs y validacion deberia permitir cubrir fallos de red, respuestas HTTP y datos malformados sin contaminar las capas superiores.",
+                        "command":  "npm run test:client:week5",
+                        "observedResult":  "1 suite y 25 tests pasaron, cubriendo respuestas validas, payloads invalidos, errores HTTP, red, timeout, JSON malformado e idempotencia.",
+                        "explanation":  "Francisco implemento y posteriormente valido la infraestructura principal del cliente cloud, incluyendo transporte HTTP, DTOs, cliente API y repositorio remoto."
+                    },
+                    {
+                        "studentId":  "3515110194",
+                        "commitShas":  [
+                                           "340c2810c1dbb8faf258edcbe76e65e05da6195c"
+                                       ],
+                        "files":  [
+                                      "App.tsx",
+                                      "course-tests/jest-fetch-setup.cjs",
+                                      "course-tests/smoke.test.tsx",
+                                      "course-tests/week-05-integration.test.ts",
+                                      "src/application/incidents/CloudIncidentCategories.ts",
+                                      "src/application/incidents/CreateCloudIncident.ts",
+                                      "src/application/incidents/GetCloudIncident.ts",
+                                      "src/application/incidents/ListCloudIncidents.ts",
+                                      "src/composition/createAppDependencies.ts",
+                                      "src/domain/incidents/CloudIncidentRepository.ts",
+                                      "src/infrastructure/incidents/RemoteIncidentRepository.ts",
+                                      "src/ui/screens/CreateIncidentScreen.tsx",
+                                      "src/ui/screens/IncidentDetailScreen.tsx",
+                                      "src/ui/screens/IncidentListScreen.tsx"
+                                  ],
+                        "tests":  [
+                                      "course-tests/week-05-integration.test.ts",
+                                      "course-tests/smoke.test.tsx"
+                                  ],
+                        "reviews":  [
+                                        "Integracion de los casos de uso, composicion de dependencias, pantallas y pruebas contra el backend real."
+                                    ],
+                        "prediction":  "Con los casos de uso conectados al repositorio remoto y las pantallas consumiendo application, la aplicacion deberia listar, consultar y crear incidencias reales sin acoplar la UI al transporte HTTP.",
+                        "command":  "npm test -- --runInBand course-tests/week-05-integration.test.ts",
+                        "observedResult":  "1 suite y 3 pruebas pasaron contra el backend real: listado, detalle existente y creacion con idempotencia.",
+                        "explanation":  "Carlos integro las capas de application, composition y UI con el repositorio remoto existente y agrego la prueba de integracion contra CampusOps para comprobar el flujo completo."
+                    }
+                ]
+}
