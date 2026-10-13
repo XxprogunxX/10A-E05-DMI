@@ -10,6 +10,10 @@ import type {
   HttpTransport,
 } from '../http/HttpTransport';
 import { HttpTransportFailure } from '../http/HttpTransport';
+import type {
+  SessionManager,
+  SessionSnapshot,
+} from '../session/SessionManager';
 import { parseIncidentResource } from './IncidentDto';
 
 export type IncidentClientFailure =
@@ -30,6 +34,7 @@ export interface IncidentApiClientOptions {
   readonly accessToken?: string;
   readonly actorId?: string;
   readonly timeoutMs?: number;
+  readonly sessionManager?: SessionManager;
 }
 
 type SafeResponse =
@@ -76,6 +81,7 @@ export class IncidentApiClient {
   private readonly accessToken: string;
   private readonly actorId: string;
   private readonly timeoutMs: number;
+  private readonly sessionManager: SessionManager | undefined;
 
   constructor(
     private readonly transport: HttpTransport,
@@ -85,15 +91,16 @@ export class IncidentApiClient {
     this.accessToken = options.accessToken ?? DEFAULT_ACCESS_TOKEN;
     this.actorId = options.actorId ?? DEFAULT_ACTOR_ID;
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.sessionManager = options.sessionManager;
   }
 
   async listIncidents(): Promise<
     IncidentClientResult<readonly CloudIncident[]>
   > {
-    const response = await this.request({
+    const response = await this.requestAuthorized({
       url: `${this.baseUrl}/v1/incidents`,
       method: 'GET',
-      headers: this.authorizationHeaders(),
+      headers: {},
       timeoutMs: this.timeoutMs,
     });
     if (!response.ok) {
@@ -141,10 +148,10 @@ export class IncidentApiClient {
   async getIncidentDetail(
     incidentId: string,
   ): Promise<IncidentClientResult<CloudIncident>> {
-    const response = await this.request({
+    const response = await this.requestAuthorized({
       url: `${this.baseUrl}/v1/incidents/${encodeURIComponent(incidentId)}`,
       method: 'GET',
-      headers: this.authorizationHeaders(),
+      headers: {},
       timeoutMs: this.timeoutMs,
     });
     if (!response.ok) {
@@ -164,11 +171,10 @@ export class IncidentApiClient {
       return { kind: 'failure', error: { kind: 'invalid_payload' } };
     }
 
-    const response = await this.request({
+    const response = await this.requestAuthorized({
       url: `${this.baseUrl}/v1/incidents`,
       method: 'POST',
       headers: {
-        ...this.authorizationHeaders(),
         'Idempotency-Key': idempotencyKey,
         'Content-Type': 'application/json',
       },
@@ -224,11 +230,65 @@ export class IncidentApiClient {
     };
   }
 
-  private authorizationHeaders(): Readonly<Record<string, string>> {
+  async logout(): Promise<void> {
+    await this.sessionManager?.logout();
+  }
+
+  private authorizationHeaders(
+    snapshot?: SessionSnapshot,
+  ): Readonly<Record<string, string>> {
     return {
-      Authorization: `Bearer ${this.accessToken}`,
-      'X-Course-Actor': this.actorId,
+      Authorization: `Bearer ${snapshot?.accessToken ?? this.accessToken}`,
+      'X-Course-Actor': snapshot?.actorId ?? this.actorId,
     };
+  }
+
+  private async requestAuthorized(input: HttpRequest): Promise<SafeResponse> {
+    const initialSession = this.sessionManager?.getSessionSnapshot();
+    if (this.sessionManager !== undefined && initialSession === null) {
+      return {
+        ok: true,
+        value: { status: 401, body: '' },
+      };
+    }
+
+    const firstResponse = await this.request({
+      ...input,
+      headers: {
+        ...input.headers,
+        ...this.authorizationHeaders(initialSession ?? undefined),
+      },
+    });
+
+    if (
+      !firstResponse.ok ||
+      firstResponse.value.status !== 401 ||
+      this.sessionManager === undefined ||
+      initialSession === undefined ||
+      initialSession === null
+    ) {
+      return firstResponse;
+    }
+
+    try {
+      await this.sessionManager.acquireValidToken(initialSession.generation);
+    } catch {
+      return firstResponse;
+    }
+
+    const refreshedSession = this.sessionManager.getSessionSnapshot();
+    if (refreshedSession === null) {
+      return firstResponse;
+    }
+
+    // This is the only retry. A second 401 is returned to the caller.
+    return this.request({
+      ...input,
+      headers: {
+        ...input.headers,
+        ...this.authorizationHeaders(refreshedSession),
+      },
+    });
   }
 
   private async request(input: HttpRequest): Promise<SafeResponse> {
