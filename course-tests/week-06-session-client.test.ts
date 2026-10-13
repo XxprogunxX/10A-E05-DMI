@@ -10,6 +10,7 @@ import { IncidentApiClient } from '../src/infrastructure/incidents/IncidentApiCl
 import {
   SessionManager,
   SessionManagerFailure,
+  type SessionClock,
 } from '../src/infrastructure/session/SessionManager';
 
 const baseUrl = 'http://backend.test';
@@ -135,6 +136,18 @@ class StubHttpTransport implements HttpTransport {
   }
 }
 
+class ControlledClock implements SessionClock {
+  constructor(private milliseconds: number) {}
+
+  now(): number {
+    return this.milliseconds;
+  }
+
+  advance(milliseconds: number): void {
+    this.milliseconds += milliseconds;
+  }
+}
+
 function sessionManagerFor(
   transport: HttpTransport,
   storage: SessionStorage,
@@ -230,6 +243,49 @@ describe('Week 06 — session-aware infrastructure client (Francisco)', () => {
       body: JSON.stringify({ actorId: 'technician-1' }),
       timeoutMs: 25,
     });
+  });
+
+  test('controlled clock expires the token and refreshes without real waits', async () => {
+    const clock = new ControlledClock(1_000);
+    const transport = new StubHttpTransport([
+      jsonResponse({
+        actorId: 'reporter-1',
+        role: 'reporter',
+        accessToken: 'short-lived-token',
+        refreshToken: 'course-refresh-0',
+        expiresIn: 1,
+      }),
+      jsonResponse({
+        accessToken: refreshedSession.accessToken,
+        refreshToken: refreshedSession.refreshToken,
+        expiresIn: 60,
+      }),
+      jsonResponse({ items: [remoteIncident] }),
+    ]);
+    const storage = new MemorySessionStorage(null);
+    const manager = new SessionManager(transport, storage, {
+      baseUrl,
+      timeoutMs: 25,
+      clock,
+    });
+    const client = clientFor(transport, manager);
+
+    await manager.login('reporter-1');
+    expect(manager.isAccessTokenExpired()).toBe(false);
+    clock.advance(1_000);
+    expect(manager.isAccessTokenExpired()).toBe(true);
+
+    await expect(client.listIncidents()).resolves.toMatchObject({
+      kind: 'available',
+    });
+    expect(transport.requests.map(({ url }) => url)).toEqual([
+      `${baseUrl}/v1/session/login`,
+      `${baseUrl}/v1/session/refresh`,
+      `${baseUrl}/v1/incidents`,
+    ]);
+    expect(transport.requests[2]?.headers.Authorization).toBe(
+      `Bearer ${refreshedSession.accessToken}`,
+    );
   });
 
   test('failed refresh returns a controlled 401 and clears persisted secrets', async () => {

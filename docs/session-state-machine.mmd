@@ -1,49 +1,41 @@
 stateDiagram-v2
-    [*] --> Unauthenticated: Inicio de la aplicación
+    [*] --> Restoring: App inicia / initialize()
+    Restoring --> Anonymous: SecureStore vacío o restauración fallida
+    Restoring --> Authenticated: sesión persistida válida
 
-    state Unauthenticated {
-        [*] --> Anonymous: Sin credenciales en memoria
-        Anonymous --> ClearingStorage: Limpieza preventiva de SecureStore
-        ClearingStorage --> AnonymousReady: Estado seguro listo
-    }
+    Anonymous --> Authenticating: login(actorId)
+    Authenticating --> Authenticated: 200 válido y save() completado [generación 0]
+    Authenticating --> Anonymous: actor inválido, red, respuesta inválida o fallo de almacenamiento
 
-    Unauthenticated --> Authenticating: login(actorId, role)
-
-    state Authenticating {
-        [*] --> RequestLogin: POST /v1/session/login
-        RequestLogin --> ValidateResponse: 200 OK con tokens
-        ValidateResponse --> PersistingSession: Guardar SessionSecrets en SecureStore
-    }
-
-    Authenticating --> Authenticated: Sesión persistida y válida (gen 0)
-    Authenticating --> Unauthenticated: 401 / error de red / actor inválido
-
-    state Authenticated {
-        [*] --> ValidSession: Tokens activos y en memoria
-        ValidSession --> RunningRequest: Petición HTTP con Authorization Bearer
-        RunningRequest --> ValidSession: 200/201 Éxito
-    }
-
-    Authenticated --> Refreshing: 401 Unauthorized / Token expirado
-    Authenticated --> LoggingOut: logout() manual
+    Authenticated --> Requesting: solicitud con Bearer y X-Course-Actor
+    Requesting --> Authenticated: respuesta distinta de 401
+    Requesting --> Refreshing: 401 de generación N (sesión expirada)
+    Authenticated --> Refreshing: reloj indica now >= expiresAt antes de solicitar
 
     state Refreshing {
-        [*] --> SingleFlightCoordinator: coordinateRefresh(events)
-        SingleFlightCoordinator --> InFlightRefresh: Primer 401 inicia POST /v1/session/refresh
-        InFlightRefresh --> CoalescingQueue: 401 concurrentes (misma generación)
-        CoalescingQueue --> InFlightRefresh: Encolar requestId para reintento único
-        InFlightRefresh --> ObsoleteDetected: 401 con gen anterior a la activa
-        ObsoleteDetected --> DrainImmediate: Reintentar de inmediato con token nuevo
+        [*] --> CoordinateSingleFlight: acquireValidToken(N)
+        CoordinateSingleFlight --> SharedRefresh: no hay refreshPromise; POST /v1/session/refresh
+        CoordinateSingleFlight --> SharedRefresh: 401 concurrente comparte refreshPromise
+        CoordinateSingleFlight --> ReuseCurrentToken: N menor que generación activa
+        SharedRefresh --> PersistNewSession: 200 válido; generación N + 1
+        PersistNewSession --> RefreshComplete: save() completado
     }
 
-    Refreshing --> Authenticated: refreshSucceeded (gen N+1, nuevo token) [Drenar cola y reintentar cada petición 1 vez]
-    Refreshing --> Unauthenticated: refreshFailed (invalid_grant / error / límite reintentos) [Borrar SecureStore]
+    Refreshing --> RetryingOnce: refresh completado o 401 obsoleto
+    RetryingOnce --> Authenticated: resultado del único reintento
+    RetryingOnce --> Authenticated: segundo 401 se devuelve al llamador, sin otro refresh
 
+    Refreshing --> ClearingSession: refresh inválido, error de red o fallo al persistir
+    ClearingSession --> Anonymous: memoria anulada y SecureStore.clear()
+
+    Authenticated --> LoggingOut: logout()
+    Refreshing --> LoggingOut: logout() durante refresh
     state LoggingOut {
-        [*] --> ClearSecrets: SecureStore.deleteItemAsync()
-        ClearSecrets --> ResetState: activeGen = null, tokens = null
-        ResetState --> AbortPending: Descartar solicitudes en cola
+        [*] --> InvalidateEpoch: incrementar authenticationEpoch
+        InvalidateEpoch --> ClearMemory: sesión, rol, generación y refreshPromise anulados
+        ClearMemory --> DeletePersistedSecrets: SecureStore.clear()
     }
+    LoggingOut --> Anonymous: cierre completado
+    LoggingOut --> Anonymous: refresh tardío queda obsoleto y no restaura tokens
 
-    LoggingOut --> Unauthenticated: Transición segura a no autenticado (tokens nunca expuestos en logs)
-    Unauthenticated --> [*]
+    Anonymous --> [*]

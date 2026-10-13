@@ -1,8 +1,12 @@
 import type { SessionSecrets } from '../../domain/session/SessionSecrets';
+import type {
+  SessionIdentityProvider,
+  SessionRole,
+} from '../../domain/session/SessionIdentity';
 import type { SessionStorage } from '../../domain/session/SessionStorage';
 import type { HttpTransport } from '../http/HttpTransport';
 
-export type SessionRole = 'reporter' | 'technician' | 'coordinator';
+export type { SessionRole } from '../../domain/session/SessionIdentity';
 
 export interface SessionSnapshot {
   readonly accessToken: string;
@@ -32,6 +36,12 @@ export interface SessionManagerOptions {
   readonly initialSession?: SessionSecrets;
   readonly initialRole?: SessionRole;
   readonly initialGeneration?: number;
+  readonly initialExpiresAt?: number;
+  readonly clock?: SessionClock;
+}
+
+export interface SessionClock {
+  now(): number;
 }
 
 interface LoginResponse {
@@ -39,21 +49,25 @@ interface LoginResponse {
   readonly role: SessionRole;
   readonly accessToken: string;
   readonly refreshToken: string;
+  readonly expiresIn: number;
 }
 
 interface RefreshResponse {
   readonly accessToken: string;
   readonly refreshToken: string;
+  readonly expiresIn: number;
 }
 
 type StoredSession = SessionSecrets &
   Readonly<{
     role?: SessionRole | null;
     generation?: number;
+    expiresAt?: number;
   }>;
 
 const DEFAULT_BASE_URL = 'http://127.0.0.1:4310';
 const DEFAULT_TIMEOUT_MS = 1_000;
+const SYSTEM_CLOCK: SessionClock = { now: () => Date.now() };
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -61,6 +75,10 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
 
 function isNonemptyText(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isPositiveFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }
 
 function isSessionRole(value: unknown): value is SessionRole {
@@ -84,7 +102,8 @@ function parseLoginResponse(body: string, actorId: string): LoginResponse | null
     decoded.actorId !== actorId ||
     !isSessionRole(decoded.role) ||
     !isNonemptyText(decoded.accessToken) ||
-    !isNonemptyText(decoded.refreshToken)
+    !isNonemptyText(decoded.refreshToken) ||
+    !isPositiveFiniteNumber(decoded.expiresIn)
   ) {
     return null;
   }
@@ -94,6 +113,7 @@ function parseLoginResponse(body: string, actorId: string): LoginResponse | null
     role: decoded.role,
     accessToken: decoded.accessToken,
     refreshToken: decoded.refreshToken,
+    expiresIn: decoded.expiresIn,
   };
 }
 
@@ -102,7 +122,8 @@ function parseRefreshResponse(body: string): RefreshResponse | null {
   if (
     !isObjectRecord(decoded) ||
     !isNonemptyText(decoded.accessToken) ||
-    !isNonemptyText(decoded.refreshToken)
+    !isNonemptyText(decoded.refreshToken) ||
+    !isPositiveFiniteNumber(decoded.expiresIn)
   ) {
     return null;
   }
@@ -110,6 +131,7 @@ function parseRefreshResponse(body: string): RefreshResponse | null {
   return {
     accessToken: decoded.accessToken,
     refreshToken: decoded.refreshToken,
+    expiresIn: decoded.expiresIn,
   };
 }
 
@@ -117,9 +139,10 @@ function parseRefreshResponse(body: string): RefreshResponse | null {
  * Owns the mutable session used by infrastructure clients. Refresh is
  * single-flight: concurrent 401 responses share the same promise.
  */
-export class SessionManager {
+export class SessionManager implements SessionIdentityProvider {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
+  private readonly clock: SessionClock;
   private session: StoredSession | null;
   private role: SessionRole | null;
   private generation: number;
@@ -133,7 +156,18 @@ export class SessionManager {
   ) {
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    this.session = options.initialSession ?? null;
+    this.clock = options.clock ?? SYSTEM_CLOCK;
+    this.session =
+      options.initialSession === undefined
+        ? null
+        : {
+            ...options.initialSession,
+            role: options.initialRole ?? null,
+            generation: options.initialGeneration ?? 0,
+            ...(options.initialExpiresAt === undefined
+              ? {}
+              : { expiresAt: options.initialExpiresAt }),
+          };
     this.role = options.initialRole ?? null;
     this.generation = options.initialGeneration ?? 0;
   }
@@ -176,6 +210,14 @@ export class SessionManager {
     };
   }
 
+  isAccessTokenExpired(): boolean {
+    return (
+      this.session !== null &&
+      typeof this.session.expiresAt === 'number' &&
+      this.clock.now() >= this.session.expiresAt
+    );
+  }
+
   async login(actorId: string): Promise<SessionSnapshot> {
     if (!isNonemptyText(actorId)) {
       throw new SessionManagerFailure('login_failed');
@@ -209,6 +251,7 @@ export class SessionManager {
       actorId: parsed.actorId,
       role: parsed.role,
       generation: 0,
+      expiresAt: this.expiresAtFromNow(parsed.expiresIn),
     };
 
     this.authenticationEpoch += 1;
@@ -308,6 +351,7 @@ export class SessionManager {
       actorId: sessionAtStart.actorId,
       role: this.role,
       generation: nextGeneration,
+      expiresAt: this.expiresAtFromNow(parsed.expiresIn),
     };
 
     try {
@@ -355,5 +399,9 @@ export class SessionManager {
       throw new SessionManagerFailure('unauthenticated');
     }
     return snapshot;
+  }
+
+  private expiresAtFromNow(expiresInSeconds: number): number {
+    return this.clock.now() + expiresInSeconds * 1_000;
   }
 }
