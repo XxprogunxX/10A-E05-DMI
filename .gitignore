@@ -13,3 +13,5 @@ dist/
 *.p8
 *.p12
 reports/**/generated-*
+reports/**/failure.json
+__pycache__/

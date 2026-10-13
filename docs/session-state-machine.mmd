@@ -1,0 +1,49 @@
+stateDiagram-v2
+    [*] --> Unauthenticated: Inicio de la aplicación
+
+    state Unauthenticated {
+        [*] --> Anonymous: Sin credenciales en memoria
+        Anonymous --> ClearingStorage: Limpieza preventiva de SecureStore
+        ClearingStorage --> AnonymousReady: Estado seguro listo
+    }
+
+    Unauthenticated --> Authenticating: login(actorId, role)
+
+    state Authenticating {
+        [*] --> RequestLogin: POST /v1/session/login
+        RequestLogin --> ValidateResponse: 200 OK con tokens
+        ValidateResponse --> PersistingSession: Guardar SessionSecrets en SecureStore
+    }
+
+    Authenticating --> Authenticated: Sesión persistida y válida (gen 0)
+    Authenticating --> Unauthenticated: 401 / error de red / actor inválido
+
+    state Authenticated {
+        [*] --> ValidSession: Tokens activos y en memoria
+        ValidSession --> RunningRequest: Petición HTTP con Authorization Bearer
+        RunningRequest --> ValidSession: 200/201 Éxito
+    }
+
+    Authenticated --> Refreshing: 401 Unauthorized / Token expirado
+    Authenticated --> LoggingOut: logout() manual
+
+    state Refreshing {
+        [*] --> SingleFlightCoordinator: coordinateRefresh(events)
+        SingleFlightCoordinator --> InFlightRefresh: Primer 401 inicia POST /v1/session/refresh
+        InFlightRefresh --> CoalescingQueue: 401 concurrentes (misma generación)
+        CoalescingQueue --> InFlightRefresh: Encolar requestId para reintento único
+        InFlightRefresh --> ObsoleteDetected: 401 con gen anterior a la activa
+        ObsoleteDetected --> DrainImmediate: Reintentar de inmediato con token nuevo
+    }
+
+    Refreshing --> Authenticated: refreshSucceeded (gen N+1, nuevo token) [Drenar cola y reintentar cada petición 1 vez]
+    Refreshing --> Unauthenticated: refreshFailed (invalid_grant / error / límite reintentos) [Borrar SecureStore]
+
+    state LoggingOut {
+        [*] --> ClearSecrets: SecureStore.deleteItemAsync()
+        ClearSecrets --> ResetState: activeGen = null, tokens = null
+        ResetState --> AbortPending: Descartar solicitudes en cola
+    }
+
+    LoggingOut --> Unauthenticated: Transición segura a no autenticado (tokens nunca expuestos en logs)
+    Unauthenticated --> [*]
