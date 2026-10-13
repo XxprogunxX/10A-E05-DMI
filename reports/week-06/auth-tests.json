@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "daf83a4ac1fd042bc55176b4314f7f0553a7997c",
+  "generatedAt": "2026-10-13T05:35:25.8040921Z",
+  "actors": ["reporter-1", "technician-1", "coordinator-1"],
+  "checks": [
+    {
+      "id": "login-three-campusops-profiles",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:session:week6",
+      "evidence": "La integración contra el backend real inició sesión como reporter-1, technician-1 y coordinator-1 y comprobó el rol devuelto y persistido para cada actor. La batería completa pasó: 5 suites y 26 pruebas."
+    },
+    {
+      "id": "controlled-clock-expiration",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:session:week6",
+      "evidence": "ControlledClock avanzó exactamente hasta expiresAt sin esperas reales; el cliente ejecutó login, un refresh y después la solicitud con el token renovado, sin enviar el token vencido."
+    },
+    {
+      "id": "reporter-resolve-forbidden",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:session:week6",
+      "evidence": "PerformIncidentAction rechazó reporter-1 con forbidden antes de enviar /actions; una invocación directa al backend real también devolvió HTTP 403."
+    },
+    {
+      "id": "technician-and-coordinator-authorized-transitions",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:session:week6",
+      "evidence": "technician-1 inició y resolvió campus-inc-001 con diagnóstico; coordinator-1 cerró la incidencia resuelta y después la reabrió contra el backend real."
+    },
+    {
+      "id": "role-permission-matrix",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:session:week6",
+      "evidence": "La matriz verificó que reportante sólo crea/consulta las propias, técnico sólo inicia o resuelve las asignadas y coordinación asigna, prioriza, cierra resueltas y reabre resueltas o cerradas."
+    },
+    {
+      "id": "failed-refresh-clears-session",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:session:week6",
+      "evidence": "Una renovación rechazada produjo un 401 controlado, dejó SessionManager sin sesión y llamó una vez a storage.clear(), sin exponer el token del proveedor."
+    },
+    {
+      "id": "obsolete-refresh-after-logout",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:session:week6",
+      "evidence": "Logout durante un refresh incrementó authenticationEpoch; la respuesta tardía fue obsolete_refresh y no restauró secretos en memoria ni almacenamiento."
+    },
+    {
+      "id": "logout-removes-persisted-session",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:session:week6",
+      "evidence": "Logout anuló la sesión activa, eliminó el valor persistido y no realizó solicitudes HTTP adicionales."
+    }
+  ]
+}

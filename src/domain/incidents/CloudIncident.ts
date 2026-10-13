@@ -36,3 +36,41 @@ export interface CreatedIncident {
   readonly operationId: string;
   readonly duplicate: boolean;
 }
+
+export type IncidentActionInput =
+  | Readonly<{
+      action: 'assign';
+      baseVersion: number;
+      technicianId: string;
+    }>
+  | Readonly<{
+      action: 'prioritize';
+      baseVersion: number;
+      priority: IncidentPriority;
+    }>
+  | Readonly<{ action: 'start'; baseVersion: number }>
+  | Readonly<{
+      action: 'resolve';
+      baseVersion: number;
+      diagnosis: string;
+    }>
+  | Readonly<{ action: 'close'; baseVersion: number }>
+  | Readonly<{ action: 'reopen'; baseVersion: number }>
+  | Readonly<{
+      action: 'comment';
+      baseVersion: number;
+      text: string;
+    }>
+  | Readonly<{
+      action: 'add_evidence';
+      baseVersion: number;
+      evidenceId: string;
+    }>;
+
+export type IncidentActionName = IncidentActionInput['action'];
+
+export interface UpdatedIncident {
+  readonly incident: CloudIncident;
+  readonly operationId: string;
+  readonly duplicate: boolean;
+}

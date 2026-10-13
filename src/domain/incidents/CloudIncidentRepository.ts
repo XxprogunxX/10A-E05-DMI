@@ -2,6 +2,8 @@ import type {
   CloudIncident,
   CreateIncidentInput,
   CreatedIncident,
+  IncidentActionInput,
+  UpdatedIncident,
 } from './CloudIncident';
 
 export type CloudIncidentFailure =
@@ -24,4 +26,9 @@ export interface CloudIncidentRepository {
     input: CreateIncidentInput,
     idempotencyKey: string,
   ): Promise<CloudIncidentResult<CreatedIncident>>;
+  performAction(
+    incidentId: string,
+    input: IncidentActionInput,
+    idempotencyKey: string,
+  ): Promise<CloudIncidentResult<UpdatedIncident>>;
 }

@@ -2,6 +2,8 @@ import type {
   CloudIncident,
   CreateIncidentInput,
   CreatedIncident,
+  IncidentActionInput,
+  UpdatedIncident,
 } from '../../domain/incidents/CloudIncident';
 import type {
   CloudIncidentFailure,
@@ -57,6 +59,16 @@ export class RemoteIncidentRepository implements CloudIncidentRepository {
   ): Promise<CloudIncidentResult<CreatedIncident>> {
     return mapResult(
       await this.client.createIncident(input, idempotencyKey),
+    );
+  }
+
+  async performAction(
+    incidentId: string,
+    input: IncidentActionInput,
+    idempotencyKey: string,
+  ): Promise<CloudIncidentResult<UpdatedIncident>> {
+    return mapResult(
+      await this.client.performAction(incidentId, input, idempotencyKey),
     );
   }
 }

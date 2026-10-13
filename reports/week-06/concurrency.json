@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "daf83a4ac1fd042bc55176b4314f7f0553a7997c",
+  "generatedAt": "2026-10-13T05:35:25.8040921Z",
+  "observed": {
+    "concurrentRequests": 3,
+    "refreshCalls": 1,
+    "maximumRetriesPerRequest": 1,
+    "persistedSecretsAfterLogout": 0
+  },
+  "checks": [
+    {
+      "id": "three-401-single-flight-unit",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:session:week6",
+      "evidence": "Tres 401 simultáneos de lista, detalle y creación compartieron la misma refreshPromise: refreshCalls=1 y las tres solicitudes se reintentaron con generación 1."
+    },
+    {
+      "id": "three-401-single-flight-real-backend",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:session:week6",
+      "evidence": "Tres llamadas Promise.all con course-expired-token contra el backend real terminaron disponibles después de exactamente un POST /v1/session/refresh."
+    },
+    {
+      "id": "obsolete-401-reuses-current-generation",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:session:week6",
+      "evidence": "Un 401 de generación 0 recibido después de activar generación 1 reutilizó el token vigente y no incrementó refreshCalls."
+    },
+    {
+      "id": "second-401-is-not-retried",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:session:week6",
+      "evidence": "Cuando el reintento único también devolvió 401, el cliente terminó con error HTTP controlado: tres transport requests totales y un solo refresh, sin bucle."
+    },
+    {
+      "id": "shared-refresh-failure-drains-safely",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:session:week6",
+      "evidence": "refreshFailed vació solicitudes pendientes, anuló generación/token persistido y dejó el estado anonymous sin programar renovaciones adicionales."
+    },
+    {
+      "id": "logout-wins-over-inflight-refresh",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:session:week6",
+      "evidence": "El cierre invalidó el epoch y limpió almacenamiento; el refresh en vuelo terminó obsoleto y persistedSecretsAfterLogout permaneció en 0."
+    }
+  ]
+}

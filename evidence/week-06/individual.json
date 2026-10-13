@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "teamId": "10A-E05",
+  "members": [
+    {
+      "name": "Javier",
+      "studentId": "3523110052",
+      "commitShas": ["bbf7d14c7c0e1910f537caf4e38fd6dd65b3816d"],
+      "files": [
+        "src/domain/session/SessionCoordinator.ts",
+        "src/course-evaluation/index.ts",
+        "course-tests/week-06-coordination.test.ts",
+        "docs/session-state-machine.mmd"
+      ],
+      "tests": ["course-tests/week-06-coordination.test.ts"],
+      "reviews": ["Definición y revisión de estados, generaciones, cola single-flight, 401 obsoletos, fallo de refresh y logout."],
+      "prediction": "Agrupar los 401 de una generación debería producir una sola renovación y reintentar cada requestId una sola vez.",
+      "command": "npm run test:session:week6",
+      "observedResult": "La coordinación formó parte de las 5 suites y 26 pruebas aprobadas; tres 401 generaron refreshCalls=1 y el logout dejó persistedToken=null.",
+      "explanation": "Javier implementó el coordinador determinista y sus pruebas de estado, que establecen la política single-flight y la transición segura a anonymous."
+    },
+    {
+      "name": "Francisco Xavier Gil Ginez",
+      "studentId": "3523110137",
+      "commitShas": ["73e6e23ad3df526e9106f876bfdc536466ed99c1"],
+      "files": [
+        "src/infrastructure/session/SessionManager.ts",
+        "src/infrastructure/incidents/IncidentApiClient.ts",
+        "course-tests/week-06-session-client.test.ts"
+      ],
+      "tests": ["course-tests/week-06-session-client.test.ts"],
+      "reviews": ["Implementación y revisión de login, refresh compartido, persistencia segura, reintento limitado y logout."],
+      "prediction": "Un SessionManager compartido por el cliente debería convertir 401 concurrentes en una sola llamada de refresh y limpiar secretos ante una falla.",
+      "command": "npm run test:session:week6",
+      "observedResult": "Las pruebas comprobaron un refresh para tres solicitudes concurrentes, un solo reintento, fallo genérico sin tokens y limpieza de memoria/almacenamiento.",
+      "explanation": "Francisco implementó la infraestructura central de sesión y conectó el cliente HTTP con el mecanismo single-flight y el almacenamiento seguro."
+    },
+    {
+      "name": "Hernández Camacho Carlos Eduardo",
+      "studentId": "3515110194",
+      "commitShas": [
+        "047294f44b8e2b0853fd5cf69dd0887f17b12692",
+        "daf83a4ac1fd042bc55176b4314f7f0553a7997c"
+      ],
+      "files": [
+        "src/application/session/IncidentAuthorization.ts",
+        "src/application/incidents/PerformIncidentAction.ts",
+        "src/composition/createAppDependencies.ts",
+        "course-tests/week-06-authorization.test.ts",
+        "course-tests/week-06-integration.test.ts",
+        "tools/course_public_evaluator.py"
+      ],
+      "tests": [
+        "course-tests/week-06-authorization.test.ts",
+        "course-tests/week-06-integration.test.ts"
+      ],
+      "reviews": ["Integración final de perfiles, autorización en application, SecureStore, reloj controlable, backend real y portabilidad Windows del evaluador."],
+      "prediction": "La composición única de SessionManager, almacenamiento seguro y autorización debería impedir operaciones por rol incorrecto y conservar una sola renovación aun con tres llamadas reales simultáneas.",
+      "command": "npm run test:session:week6 && make verify-week-06",
+      "observedResult": "Pasaron 5 suites con 26 pruebas y el evaluador oficial terminó PASS, incluyendo login de tres roles, 403, transiciones autorizadas, concurrencia, logout y escaneo de secretos.",
+      "explanation": "Carlos integró application, domain, infrastructure, composition y UI; añadió autorización verificable, acciones reales, expiración con reloj controlado, pruebas contra CampusOps y el ajuste necesario para reproducir la evaluación en Windows."
+    }
+  ]
+}

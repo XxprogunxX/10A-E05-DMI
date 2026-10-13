@@ -3,6 +3,8 @@ import {
   type CloudIncident,
   type CreatedIncident,
   type CreateIncidentInput,
+  type IncidentActionInput,
+  type UpdatedIncident,
 } from '../../domain/incidents/CloudIncident';
 import type {
   HttpRequest,
@@ -64,6 +66,29 @@ function isValidCreateInput(input: CreateIncidentInput): boolean {
 
 function isValidIdempotencyKey(value: string): boolean {
   return value.trim().length >= 8;
+}
+
+function isValidActionInput(input: IncidentActionInput): boolean {
+  if (!Number.isInteger(input.baseVersion) || input.baseVersion < 0) {
+    return false;
+  }
+
+  switch (input.action) {
+    case 'assign':
+      return isNonemptyText(input.technicianId);
+    case 'prioritize':
+      return ['low', 'medium', 'high'].includes(input.priority);
+    case 'resolve':
+      return isNonemptyText(input.diagnosis);
+    case 'comment':
+      return isNonemptyText(input.text);
+    case 'add_evidence':
+      return isNonemptyText(input.evidenceId);
+    case 'start':
+    case 'close':
+    case 'reopen':
+      return true;
+  }
 }
 
 function parseJson(
@@ -230,6 +255,69 @@ export class IncidentApiClient {
     };
   }
 
+  async performAction(
+    incidentId: string,
+    input: IncidentActionInput,
+    idempotencyKey: string,
+  ): Promise<IncidentClientResult<UpdatedIncident>> {
+    if (
+      !isNonemptyText(incidentId) ||
+      !isValidActionInput(input) ||
+      !isValidIdempotencyKey(idempotencyKey)
+    ) {
+      return { kind: 'failure', error: { kind: 'invalid_payload' } };
+    }
+
+    const response = await this.requestAuthorized({
+      url: `${this.baseUrl}/v1/incidents/${encodeURIComponent(incidentId)}/actions`,
+      method: 'POST',
+      headers: {
+        'Idempotency-Key': idempotencyKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(input),
+      timeoutMs: this.timeoutMs,
+    });
+    if (!response.ok) {
+      return { kind: 'failure', error: response.error };
+    }
+    if (![200, 201].includes(response.value.status)) {
+      return {
+        kind: 'failure',
+        error: { kind: 'http', status: response.value.status },
+      };
+    }
+
+    const decoded = parseJson(response.value.body);
+    if (!decoded.ok) {
+      return { kind: 'failure', error: { kind: 'invalid_json' } };
+    }
+    if (
+      !isObjectRecord(decoded.value) ||
+      decoded.value.operationId !== idempotencyKey ||
+      typeof decoded.value.duplicate !== 'boolean' ||
+      !Object.hasOwn(decoded.value, 'incident')
+    ) {
+      return { kind: 'failure', error: { kind: 'contract' } };
+    }
+
+    const incident = parseIncidentResource(decoded.value.incident);
+    if (!incident.ok) {
+      return incident.error === 'empty_payload'
+        ? { kind: 'empty_payload' }
+        : { kind: 'failure', error: { kind: incident.error } };
+    }
+
+    return {
+      kind: 'available',
+      value: {
+        incident: incident.value,
+        operationId: idempotencyKey,
+        duplicate: decoded.value.duplicate,
+      },
+    };
+  }
+
   async logout(): Promise<void> {
     await this.sessionManager?.logout();
   }
@@ -244,12 +332,29 @@ export class IncidentApiClient {
   }
 
   private async requestAuthorized(input: HttpRequest): Promise<SafeResponse> {
-    const initialSession = this.sessionManager?.getSessionSnapshot();
+    let initialSession = this.sessionManager?.getSessionSnapshot();
     if (this.sessionManager !== undefined && initialSession === null) {
       return {
         ok: true,
         value: { status: 401, body: '' },
       };
+    }
+
+    if (
+      this.sessionManager !== undefined &&
+      initialSession !== undefined &&
+      initialSession !== null &&
+      this.sessionManager.isAccessTokenExpired()
+    ) {
+      try {
+        await this.sessionManager.acquireValidToken(initialSession.generation);
+      } catch {
+        return { ok: true, value: { status: 401, body: '' } };
+      }
+      initialSession = this.sessionManager.getSessionSnapshot();
+      if (initialSession === null) {
+        return { ok: true, value: { status: 401, body: '' } };
+      }
     }
 
     const firstResponse = await this.request({

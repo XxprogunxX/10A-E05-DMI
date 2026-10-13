@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "daf83a4ac1fd042bc55176b4314f7f0553a7997c",
+  "decision": "Centralizar el ciclo de sesión en SessionManager, persistir secretos únicamente mediante Expo SecureStore y compartir una sola promesa de renovación por generación. IncidentApiClient reintenta cada solicitud como máximo una vez, mientras IncidentAuthorization aplica los permisos de CampusOps en application y el backend conserva la validación definitiva.",
+  "alternatives": [
+    "Renovar de forma independiente dentro de cada llamada HTTP. Se descartó porque tres respuestas 401 simultáneas producirían varias rotaciones del refresh token, carreras de persistencia y resultados no deterministas.",
+    "Resolver los perfiles ocultando botones en React Native. Se descartó porque una llamada directa aún podría ejecutar una operación prohibida y no cumpliría la validación de autorización en application y backend.",
+    "Mantener el token sólo en memoria y obligar a iniciar sesión en cada arranque. Se descartó porque evita parte del riesgo de persistencia, pero incumple el ciclo de restauración requerido y ofrece una experiencia innecesariamente frágil."
+  ],
+  "tradeoff": "La promesa single-flight, las generaciones, authenticationEpoch, el reloj inyectable y la validación previa agregan estado y pruebas a la infraestructura. A cambio, eliminan renovaciones duplicadas, hacen determinista la expiración, impiden que una respuesta obsoleta restaure tokens tras logout y permiten demostrar permisos antes de contactar al backend; el costo restante es mantener sincronizados el diagrama, las reglas locales y el contrato remoto.",
+  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+  "aiAssistance": "Se utilizó asistencia de IA para apoyar implementación, revisión y redacción estructurada. Carlos revisó los cambios y los verificó con los comandos registrados contra pruebas controladas y el backend real.",
+  "verification": [
+    {
+      "command": "make feedback",
+      "result": "PASS",
+      "evidence": "Pasaron typecheck, lint, 2 smoke tests, auditoría con 0 vulnerabilidades críticas y exportación Android de Expo (608 módulos, bundle de 1.5 MB), sin requerir Android SDK."
+    },
+    {
+      "command": "make verify-week-06",
+      "result": "PASS",
+      "evidence": "El evaluador oficial registró base, perfil React Native, scripts, workflow, escaneo de secretos, typecheck, lint, auditoría, smoke y backend:self-test en PASS para daf83a4ac1fd042bc55176b4314f7f0553a7997c."
+    },
+    {
+      "command": "npm run test:session:week6",
+      "result": "PASS",
+      "evidence": "5 suites y 26 pruebas pasaron: coordinación, cliente de sesión, matriz de autorización, integración con backend real y prueba pública."
+    },
+    {
+      "command": "npm run test:architecture",
+      "result": "PASS",
+      "evidence": "51 imports por capas fueron inspeccionados sin dependencias prohibidas y las 2 pruebas de puertos/repositorios pasaron."
+    }
+  ]
+}
