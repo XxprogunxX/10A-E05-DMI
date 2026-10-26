@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "commitSha": "4ed6b40966eaef330ef1de3890078d2b8b40ca69",
+  "generatedAt": "2026-10-26T17:24:00.000Z",
+  "migrationStates": {
+    "before": {
+      "schemaVersion": 1,
+      "incidentIds": ["campus-inc-001"],
+      "pendingOperationIds": [
+        "op-legacy-start-001",
+        "op-legacy-evidence-002"
+      ]
+    },
+    "afterFailure": {
+      "schemaVersion": 1,
+      "rolledBack": true,
+      "corruptedPartialMigrationPresent": false,
+      "incidentIds": ["campus-inc-001"],
+      "pendingOperationIds": [
+        "op-legacy-start-001",
+        "op-legacy-evidence-002"
+      ]
+    },
+    "afterRecovery": {
+      "schemaVersion": 2,
+      "migratedFromVersion": 1,
+      "incidentIds": ["campus-inc-001"],
+      "pendingOperationIds": [
+        "op-legacy-start-001",
+        "op-legacy-evidence-002"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "id": "offline-queue-restart-and-pending-photo-ref",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:sync:week8",
+      "evidence": "Al cerrar y reabrir PersistentIncidentStore (tanto en memoria compartida como en archivo real sobre FileKeyValuePersistenceDriver), se recuperaron las operaciones op-tech1-start-001, op-tech1-comment-002 y op-tech1-evidence-003 (además de op-week08-tech1-start-001 en disco) con su mismo operationId, baseVersion=1 y pendingEvidence con uploadState='pending_upload'."
+    },
+    {
+      "id": "schema-v1-to-v2-valid-migration",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:sync:week8",
+      "evidence": "Datos del esquema v1 migraron a schemaVersion=2 (migratedFromVersion=1) conservando campus-inc-001 (assignedTechnicianId='technician-1', sin inventar reporterId cuando está ausente) y la operación op-legacy-start-001 con su referencia de evidencia pendiente."
+    },
+    {
+      "id": "schema-migration-failure-and-atomic-rollback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:sync:week8",
+      "evidence": "Al inyectar fallas después de las etapas incidents y queue, la transacción restauró automáticamente el respaldo v1 desde backupKey (schemaVersion=1, sin corruptedPartialMigration) y también recuperó en disco una migración interrumpida antes del catch, completando la transición a schemaVersion=2."
+    },
+    {
+      "id": "concurrent-reassignment-conflict-and-week6-auth",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:sync:week8",
+      "evidence": "Contra el backend real CampusOps, technician-1 encoló start sin conexión (baseVersion=1) mientras coordinator-1 reasignó campus-inc-001 a technician-2 (version=2). Al reconectar, OfflineIncidentSyncService detectó { kind: 'conflict', fields: ['work'] }, preservó assignedTechnicianId='technician-2' (version=2), mantuvo la operación local en status='conflicted' y verificó authorizationStillValid=false con IncidentAuthorization de Semana 6."
+    },
+    {
+      "id": "independent-fields-merge-and-canonical-json",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:sync:week8",
+      "evidence": "resolveSync combinó cambios independientes (start local de technician-1 y prioritize='high' remoto de coordinator-1) tanto en dominio puro como contra el backend real (version=4, status='in_progress', priority='high'), y reportó conflictos múltiples en orden alfabético ['diagnosis', 'priority', 'work'] comparando por contenido JSON canónico."
+    },
+    {
+      "id": "deduplication-and-idempotent-replay-retention",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:sync:week8",
+      "evidence": "deduplicateOperations conservó la primera operación por operationId sin mutar entradas. Ante server_error (500) la operación permaneció en la cola persistente (status='failed'); al restablecer la conexión se aplicó una sola vez (version=3) y se retiró de la cola; al repetirla con el mismo operationId el servidor respondió duplicate=true sin volver a incrementar version."
+    }
+  ]
+}

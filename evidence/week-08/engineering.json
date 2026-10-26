@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "commitSha": "4ed6b40966eaef330ef1de3890078d2b8b40ca69",
+  "decision": "Adoptar una política de sincronización determinista de tres vías basada en contenido JSON canónico (resolveSyncRecords) integrada con una cola persistente durable (PersistentIncidentStore respaldado por FileKeyValuePersistenceDriver en disco y ExpoSecureKeyValueDriver en el dispositivo bajo el namespace aislado mx.edu.dmi.campusops.offline) y migración transaccional v1->v2 con respaldo/rollback. Los cambios independientes se combinan automáticamente; cuando coinciden un inicio de atención offline del técnico y una reasignación remota de coordinación sobre el campo compuesto 'work', se declara conflicto explícito sin sobrescribir la asignación remota (version 2) ni borrar la intención local (que permanece en la cola con status='conflicted' respetando IncidentAuthorization de Semana 6); finalmente, las operaciones usan operationId estable como Idempotency-Key y sólo se retiran de la cola tras confirmación explícita del servidor.",
+  "alternatives": [
+    "Aplicar una política Last-Write-Wins donde la última sincronización sobrescribe el estado remoto o local sin comparar contra la versión base. Se descartó porque al reconectar el técnico impondría una asignación antigua sobre la reasignación de coordinación o perdería silenciosamente su inicio de atención y notas.",
+    "Descartar automáticamente de la cola local cualquier operación que reciba HTTP 409, 403 o 500 al sincronizar. Se descartó porque eliminaría cambios no confirmados, notas y referencias a fotografías pendientes ante conflictos de versión o fallas transitorias del servidor.",
+    "Conservar la cola únicamente en estructuras en memoria (Array o Map volátil) o ejecutar la migración v1->v2 modificando el registro en el lugar sin respaldo previo. Se descartó porque cerrar la aplicación perdería las operaciones pendientes y una falla a mitad de la migración dejaría el esquema v1 mezclado con el v2."
+  ],
+  "tradeoff": "Mantener un respaldo transaccional durante la migración v1->v2, serializar objetos en formato JSON canónico con claves ordenadas y conservar en disco las operaciones en estado 'conflicted' o 'failed' añade almacenamiento local y estados explícitos en la capa de aplicación. A cambio, garantiza que ninguna falla de migración corrompa el almacén, evita efectos duplicados en el servidor mediante Idempotency-Key estable y asegura que ni la reasignación remota ni el trabajo offline del técnico se pierdan silenciosamente.",
+  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+  "aiAssistance": "Se utilizó asistencia de IA para estructurar el motor de comparación JSON canónica, el respaldo transaccional v1->v2 y las pruebas de integración. Los tres integrantes revisaron los cambios y verificaron su comportamiento con las baterías de Semana 6 y Semana 8.",
+  "verification": [
+    {
+      "command": "make feedback",
+      "result": "PASS",
+      "evidence": "Pasaron typecheck, lint, 2 smoke tests, auditoría de producción con 0 vulnerabilidades críticas y exportación Android de Expo."
+    },
+    {
+      "command": "make verify-week-08",
+      "result": "PASS",
+      "evidence": "El evaluador oficial registró base_files, react_native_profile, toolchain_scripts, workflow_integrity, secret_scan, typecheck, lint, audit:ci, test:smoke y backend:self-test en PASS."
+    },
+    {
+      "command": "npm run test:sync:week8 && npm run test:session:week6",
+      "result": "PASS",
+      "evidence": "Pasaron las 5 suites y 20 pruebas de Semana 8 (dominio de sincronización, persistencia/migración con rollback, driver seguro de Expo, integración en disco/backend real y prueba pública) junto con las 5 suites y 26 pruebas de Semana 6."
+    },
+    {
+      "command": "make public-test-week-08",
+      "result": "PASS",
+      "evidence": "El evaluador oficial validó los archivos requeridos, los esquemas JSON de reportes/evidencias y la suite pública course-tests/public/week-08.test.ts."
+    }
+  ]
+}
