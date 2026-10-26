@@ -8,6 +8,10 @@ import type {
 } from './contracts';
 import type { IncidentLocation } from '../campusops/contracts';
 import { coordinateSessionEvents } from '../domain/session/SessionCoordinator';
+import {
+  deduplicatePendingOperations,
+  resolveSyncRecords,
+} from '../domain/sync/SyncResolver';
 import { redactTelemetry } from '../domain/telemetry/redactTelemetry';
 import { parseRemoteResource as parseRemoteResourceAtBoundary } from '../infrastructure/remote/parseRemoteResource';
 
@@ -34,17 +38,17 @@ export function coordinateRefresh(events: readonly AuthEvent[]): Readonly<{
 }
 
 export function resolveSync(
-  _base: SyncRecord,
-  _local: SyncRecord,
-  _remote: SyncRecord,
+  base: SyncRecord,
+  local: SyncRecord,
+  remote: SyncRecord,
 ): Readonly<{ kind: 'merged'; fields: JsonObject } | { kind: 'conflict'; fields: readonly string[] }> {
-  return pending('resolveSync');
+  return resolveSyncRecords(base, local, remote);
 }
 
 export function deduplicateOperations<T extends Readonly<{ operationId: string }>>(
-  _operations: readonly T[],
+  operations: readonly T[],
 ): readonly T[] {
-  return pending('deduplicateOperations');
+  return deduplicatePendingOperations(operations);
 }
 
 export function planRetry(_input: Readonly<{
