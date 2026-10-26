@@ -91,3 +91,41 @@ export interface LocalStorageSchemaV2 {
   readonly queue: readonly PersistentQueueOperation[];
   readonly updatedAt: string;
 }
+
+/**
+ * Domain port for the local persistent incident store and operation queue.
+ */
+export interface OfflineIncidentStorePort {
+  initialize(): Promise<LocalStorageSchemaV2>;
+  close(): Promise<void>;
+  saveIncident(
+    incident: CloudIncident,
+    options?: {
+      readonly notes?: readonly IncidentNoteEntry[];
+      readonly evidence?: readonly PendingEvidenceReference[];
+      readonly lastSyncedVersion?: number;
+    },
+  ): Promise<PersistedIncidentRecord>;
+  getIncidentRecord(
+    incidentId: string,
+  ): Promise<PersistedIncidentRecord | null>;
+  enqueueOfflineOperation(input: {
+    readonly operationId: string;
+    readonly incidentId: string;
+    readonly actorId: string;
+    readonly payload: IncidentActionInput;
+    readonly createdAt?: string;
+    readonly pendingEvidence?: readonly PendingEvidenceReference[];
+  }): Promise<PersistentQueueOperation>;
+  getQueue(): Promise<readonly PersistentQueueOperation[]>;
+  markOperationConflicted(
+    operationId: string,
+    conflictFields: readonly string[],
+    remoteIncident?: CloudIncident,
+  ): Promise<void>;
+  markOperationFailed(operationId: string, errorCode: string): Promise<void>;
+  confirmOperationSynced(
+    operationId: string,
+    confirmedIncident: CloudIncident,
+  ): Promise<void>;
+}

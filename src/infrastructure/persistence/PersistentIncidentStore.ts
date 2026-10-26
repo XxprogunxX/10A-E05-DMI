@@ -127,7 +127,19 @@ export class PersistentIncidentStore {
    */
   async initialize(fault?: MigrationFaultInjection): Promise<LocalStorageSchemaV2> {
     this.closed = false;
-    const raw = await this.driver.getItem(this.storageKey);
+    let raw = await this.driver.getItem(this.storageKey);
+    const interruptedMigrationBackup = await this.driver.getItem(
+      this.backupKey,
+    );
+
+    if (interruptedMigrationBackup !== null) {
+      // A backup left across process reconstruction means the prior migration
+      // never completed its commit/cleanup boundary. Restore v1 first and then
+      // run the normal migration path; never inspect or expose partial v2 data.
+      await this.driver.setItem(this.storageKey, interruptedMigrationBackup);
+      await this.driver.removeItem(this.backupKey);
+      raw = interruptedMigrationBackup;
+    }
 
     if (raw === null) {
       const emptyState: LocalStorageSchemaV2 = {
@@ -321,6 +333,13 @@ export class PersistentIncidentStore {
     readonly pendingEvidence?: readonly PendingEvidenceReference[];
   }): Promise<PersistentQueueOperation> {
     const current = this.assertOpen();
+    const existingOperation = current.queue.find(
+      (item) => item.operationId === input.operationId,
+    );
+    if (existingOperation !== undefined) {
+      return cloneDeep(existingOperation);
+    }
+
     const record = current.incidents[input.incidentId];
 
     // Ensure pending evidence references are explicitly marked pending_upload.

@@ -9,7 +9,7 @@ Para preservar la integridad de ambos hechos y sobrevivir al cierre o reinicio d
 | Tipo de dato | Almacenamiento elegido | Clave / Ubicación | Justificación |
 |---|---|---|---|
 | **Secretos de sesión** (`accessToken`, `refreshToken`, `actorId`, `role`, `generation`) | `ExpoSecureSessionStorage` (`expo-secure-store`) | `campusops.session.v1` | Cifrado respaldado por Keystore/Keychain del sistema operativo; nunca se mezcla con el almacén de incidencias ni con logs. |
-| **Estado operativo local y cola de sincronización** (incidencias cacheadas, notas, referencias de evidencia pendiente y cola de operaciones) | `PersistentIncidentStore` sobre adaptador de almacenamiento clave-valor durable (`KeyValuePersistenceDriver` con respaldo en archivo/disco JSON transaccional) | `campusops.offline.db.v2` (respaldo transaccional en `campusops.offline.db.backup`) | No contiene secretos de autenticación, requiere lecturas/escrituras estructuradas atómicas y sobrevive al cierre y reapertura del proceso. Una lista únicamente en memoria (`InMemoryIncidentRepository`) no cumple este requisito. |
+| **Estado operativo local y cola de sincronización** (incidencias cacheadas, notas, referencias de evidencia pendiente y cola de operaciones) | `PersistentIncidentStore`; en la app usa `ExpoSecureKeyValueDriver` y en integración Node usa `FileKeyValuePersistenceDriver` con reemplazo atómico `.tmp + rename` | Claves `campusops.offline.db.v2` y `campusops.offline.db.backup`; namespace nativo aislado `mx.edu.dmi.campusops.offline` | Está separado de los secretos de sesión, sobrevive a la reconstrucción del proceso y permite probar persistencia física real. Una lista únicamente en memoria (`InMemoryIncidentRepository`) no cumple este requisito. |
 
 ---
 
@@ -88,8 +88,9 @@ Cuando la aplicación abre el almacén local (`PersistentIncidentStore.initializ
 3. **Transformación en etapas verificadas:**
    - **Etapa 1 (Incidencias):** transforma cada `LegacyIncidentRecordV1` (`assignedTo` → `assignedTechnicianId`, inicializa `notes: []`, `evidence: []`, `lastSyncedVersion: version`).
    - **Etapa 2 (Cola de operaciones):** transforma cada `LegacyQueueOperationV1` conservando intactos `opId` → `operationId`, `incidentId`, `version` → `baseVersion`, `actor` → `actorId`, `action` y `body` → `payload`, además de mapear `evidenceIds` a `PendingEvidenceReference` con `uploadState: 'pending_upload'`.
-   - **Etapa 3 (Validación y commit atómico):** verifica que el conteo de incidencias y operaciones coincida y que ningún `operationId` se haya perdido o duplicado; sólo entonces persiste el documento `schemaVersion: 2` y limpia la marca de transacción en curso.
+   - **Etapa 3 (Commit):** construye el documento v2 completo en memoria, deduplica la cola conservando la primera aparición y sólo entonces persiste `schemaVersion: 2` y elimina el respaldo.
 4. **Manejo de falla e integridad por Rollback:**
    - Si ocurre una interrupción o falla inyectada durante cualquiera de las etapas antes del commit final, el manejador `catch` restaura inmediatamente el snapshot crudo de `backupKey` sobre la clave principal.
+   - Si el proceso termina antes de ejecutar ese `catch`, el siguiente `initialize()` detecta el respaldo pendiente, restaura primero el snapshot v1 y vuelve a ejecutar la migración; el documento parcial nunca se expone.
    - De este modo, **nunca queda parte del esquema v2 mezclado con el esquema v1**, ni se pierden incidencias u operaciones pendientes.
    - En el siguiente intento de inicialización sin falla inyectada, la migración se reejecuta desde el estado v1 íntegro y completa la transición a `schemaVersion: 2`.

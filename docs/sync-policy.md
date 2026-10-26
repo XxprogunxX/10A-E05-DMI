@@ -59,6 +59,7 @@ La función pura `resolveSync(base, local, remote)` en `src/domain/sync/SyncReso
 4. **Momento exacto de retirar una operación de la cola:**
    - Una operación **sólo se retira de la cola persistente** cuando el servidor confirma su aplicación exitosa (`200` o `201` validado con `operationId` coincidente, sea `duplicate: false` o `duplicate: true`).
    - Ante `timeout`, falla de red (`network`), error `500`, `429` o conflicto (`409` / `status: 'conflicted'`), la operación **permanece en la cola persistente**.
+   - Una operación marcada `conflicted` no se reintenta automáticamente: requiere resolución explícita para evitar que una reconexión posterior imponga silenciosamente la intención local.
 
 ---
 
@@ -67,5 +68,7 @@ La función pura `resolveSync(base, local, remote)` en `src/domain/sync/SyncReso
 | Regla / Caso | Archivo de prueba | Qué verifica |
 |---|---|---|
 | Conflicto `work` (inicio offline vs reasignación remota), combinación de campos independientes y deduplicación pura | `course-tests/public/week-08.test.ts` y `course-tests/week-08-sync-domain.test.ts` | `resolveSync` detecta `{ kind: 'conflict', fields: ['work'] }`, combina cambios independientes, ordena conflictos por nombre, compara JSON canónico y `deduplicateOperations` conserva la primera operación sin mutar entradas. |
-| Persistencia real en disco, supervivencia al reinicio, referencias a fotos pendientes y migración v1→v2 con rollback ante falla | `course-tests/week-08-persistence-migration.test.ts` | Cerrar y reabrir la tienda recupera el mismo `operationId` y contenido; las fotos pendientes conservan `uploadState: 'pending_upload'`; la falla inyectada revierte a `schemaVersion: 1` sin mezclar esquemas y la recuperación posterior completa `schemaVersion: 2`. |
-| Flujo extremo a extremo contra backend CampusOps, autorización Semana 06, conflicto real e idempotencia al repetir operación | `course-tests/week-08-integration.test.ts` | Comprueba login/refresh/401/permisos de Semana 06, conflicto entre `technician-1` (offline) y `coordinator-1` (remoto), conservación de cola en conflicto/error y retiro exclusivo tras confirmación idempotente (`duplicate: true`). |
+| Persistencia, migración v1→v2 y rollback ante falla | `course-tests/week-08-persistence-migration.test.ts` y `course-tests/week-08-integration.test.ts` | La prueba unitaria cubre reapertura y falla inyectada; la integración usa un archivo físico y también reconstruye el almacén con respaldo pendiente para recuperar una migración interrumpida. |
+| Adaptador nativo aislado de secretos de sesión | `course-tests/week-08-secure-driver.test.ts` | Verifica namespace offline, normalización de claves, reconstrucción headless y falla cerrada sin filtrar el valor persistido. |
+| Flujo extremo a extremo contra backend CampusOps | `course-tests/week-08-integration.test.ts` | Comprueba autorización, conflicto entre técnico y coordinación, combinación de prioridad remota con inicio local, conservación de cola en conflicto/error, deduplicación persistente y retiro tras confirmación idempotente (`duplicate: true`). |
+| Regresión de sesión segura | `course-tests/week-06-session-client.test.ts` y `course-tests/week-06-integration.test.ts` | Mantiene login, 401 concurrentes con refresh single-flight, reintento limitado y logout sin secretos persistidos. |
