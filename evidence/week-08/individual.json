@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "teamId": "10A-E05",
+  "members": [
+    {
+      "name": "Javier",
+      "studentId": "3523110052",
+      "commitShas": ["dfff9b7cc77d36d2a26155dad296d08ce2534137"],
+      "files": [
+        "src/domain/sync/SyncResolver.ts",
+        "src/domain/sync/OfflineSyncTypes.ts",
+        "src/course-evaluation/index.ts",
+        "course-tests/week-08-sync-domain.test.ts",
+        "docs/data-model.md",
+        "docs/sync-policy.md"
+      ],
+      "tests": [
+        "course-tests/week-08-sync-domain.test.ts",
+        "course-tests/public/week-08.test.ts"
+      ],
+      "reviews": [
+        "Definición del modelo local v1/v2, comparación por contenido JSON canónico, combinación de campos independientes, detección de conflicto en work y deduplicación inmutable."
+      ],
+      "prediction": "Comparar campos por contenido JSON canónico y proyectar asignación y estado en work debería combinar cambios independientes y reportar ['work'] cuando chocan inicio offline y reasignación remota sin mutar las entradas.",
+      "command": "npm run test:sync:week8",
+      "observedResult": "Las suites de dominio y públicas pasaron (7 pruebas en total): resolveSync reportó { kind: 'conflict', fields: ['work'] }, combinó prioridad y estado independientes y deduplicateOperations conservó la primera operación por operationId.",
+      "explanation": "Javier implementó el motor determinista resolveSyncRecords y deduplicatePendingOperations en dominio, los contratos de esquema v1/v2 y referencias de evidencia pendiente, los adaptadores de evaluación y la documentación técnica."
+    },
+    {
+      "name": "Francisco Xavier Gil Ginez",
+      "studentId": "3523110137",
+      "commitShas": ["5dc3fa8a8443c6304e4a022839f55396016d2f24"],
+      "files": [
+        "src/infrastructure/persistence/PersistentIncidentStore.ts",
+        "course-tests/week-08-persistence-migration.test.ts"
+      ],
+      "tests": [
+        "course-tests/week-08-persistence-migration.test.ts"
+      ],
+      "reviews": [
+        "Implementación de PersistentIncidentStore, preservación de cola y referencias a fotografías pendientes (pending_upload) tras cerrar y reabrir, y migración transaccional v1->v2 con rollback en las etapas incidents y queue."
+      ],
+      "prediction": "Respaldar el estado crudo v1 antes de migrar debería permitir revertir íntegramente cualquier falla inyectada tras incidents o queue sin mezclar esquemas v1 y v2.",
+      "command": "npm run test:sync:week8",
+      "observedResult": "Pasaron las 5 pruebas de persistencia y migración: la cola conservó operationId y pending_upload al cerrar/reabrir, migró v1->v2 sin inventar reporterId opcional y revirtió a schemaVersion=1 ante fallas en ambas etapas.",
+      "explanation": "Francisco implementó PersistentIncidentStore, el manejo de referencias de evidencia pendiente y la migración atómica v1->v2 con inyección de fallas, rollback automático y pruebas de recuperación."
+    },
+    {
+      "name": "Hernández Camacho Carlos Eduardo",
+      "studentId": "3515110194",
+      "commitShas": ["9fb3e34d3fa4095e2fb7a2325b6b556ab4179129"],
+      "files": [
+        "src/infrastructure/persistence/FileKeyValuePersistenceDriver.ts",
+        "src/infrastructure/persistence/ExpoSecureKeyValueDriver.ts",
+        "src/application/sync/OfflineIncidentSyncService.ts",
+        "src/composition/createAppDependencies.ts",
+        "course-tests/week-08-secure-driver.test.ts",
+        "course-tests/week-08-integration.test.ts"
+      ],
+      "tests": [
+        "course-tests/week-08-secure-driver.test.ts",
+        "course-tests/week-08-integration.test.ts"
+      ],
+      "reviews": [
+        "Implementación de adaptadores durables en archivo JSON atómico y Expo SecureStore, integración de OfflineIncidentSyncService con IncidentAuthorization de Semana 6 y pruebas extremo a extremo contra el backend real CampusOps."
+      ],
+      "prediction": "Persistencia en archivo real junto con OfflineIncidentSyncService debería recuperar la cola tras reconstruir el almacén, detectar el conflicto con coordinator-1 sin sobrescribir technician-2 y aplicar reintentos idempotentes una sola vez.",
+      "command": "npm run test:sync:week8 && npm run test:session:week6",
+      "observedResult": "Pasaron las 5 suites (20 pruebas) de Semana 8 y las 5 suites (26 pruebas) de Semana 6: el archivo en disco conservó la cola, el conflicto mantuvo version=2 con status='conflicted' y el reenvío con igual operationId devolvió duplicate=true.",
+      "explanation": "Carlos implementó FileKeyValuePersistenceDriver, ExpoSecureKeyValueDriver, OfflineIncidentSyncService, la composición de dependencias y las pruebas de integración con el backend real y recuperación desde respaldo en disco."
+    }
+  ]
+}
