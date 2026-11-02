@@ -7,6 +7,8 @@ import type {
   SyncRecord,
 } from './contracts';
 import type { IncidentLocation } from '../campusops/contracts';
+import { selectIncidentLocation as selectValidatedIncidentLocation } from '../domain/location/IncidentLocationSelector';
+import { planRetry as planBoundedRetry } from '../domain/resilience/RetryPolicy';
 import { coordinateSessionEvents } from '../domain/session/SessionCoordinator';
 import {
   deduplicatePendingOperations,
@@ -51,14 +53,14 @@ export function deduplicateOperations<T extends Readonly<{ operationId: string }
   return deduplicatePendingOperations(operations);
 }
 
-export function planRetry(_input: Readonly<{
+export function planRetry(input: Readonly<{
   method: 'GET' | 'POST';
   status: number | 'timeout';
   attempt: number;
   retryAfterMs?: number;
   idempotencyKey?: string;
 }>): Readonly<{ retry: boolean; delayMs: number; requiresStableIdempotencyKey: boolean }> {
-  return pending('planRetry');
+  return planBoundedRetry(input);
 }
 
 export function reduceRemoteResponses(_input: Readonly<{
@@ -74,7 +76,7 @@ export function reducePermissionLifecycle(
   return pending('reducePermissionLifecycle');
 }
 
-/** Week 09: see docs/CAMPUSOPS_API.md; this is not a completed solution. */
-export function selectIncidentLocation(_provider: unknown, _manualLabel: string): IncidentLocation {
-  return pending('selectIncidentLocation');
+/** Week 09: see docs/CAMPUSOPS_API.md; delegates to domain location selector. */
+export function selectIncidentLocation(provider: unknown, manualLabel: string): IncidentLocation {
+  return selectValidatedIncidentLocation(provider, manualLabel);
 }
