@@ -4,14 +4,20 @@ import { GetIncidentDetail } from '../application/incidents/GetIncidentDetail';
 import { ListCloudIncidents } from '../application/incidents/ListCloudIncidents';
 import { ListIncidents } from '../application/incidents/ListIncidents';
 import { PerformIncidentAction } from '../application/incidents/PerformIncidentAction';
+import { ResilientIncidentActionService } from '../application/resilience/ResilientIncidentActionService';
 import { IncidentAuthorization } from '../application/session/IncidentAuthorization';
 import { OfflineIncidentSyncService } from '../application/sync/OfflineIncidentSyncService';
 import { ReportTechnicalError } from '../application/telemetry/ReportTechnicalError';
 import type { IncidentRepository } from '../domain/incidents/IncidentRepository';
+import type { GeocodingProviderPort } from '../domain/location/IncidentLocationSelector';
 import { InMemoryIncidentRepository } from '../infrastructure/incidents/InMemoryIncidentRepository';
 import { IncidentApiClient } from '../infrastructure/incidents/IncidentApiClient';
 import { RemoteIncidentRepository } from '../infrastructure/incidents/RemoteIncidentRepository';
 import { FetchHttpTransport } from '../infrastructure/http/HttpTransport';
+import {
+  CourseGeocodingClient,
+  InMemoryGeocodingCache,
+} from '../infrastructure/location/GeocodingClient';
 import type { SessionStorage } from '../domain/session/SessionStorage';
 import type { OfflineIncidentStorePort } from '../domain/sync/OfflineSyncTypes';
 import { ExpoSecureKeyValueDriver } from '../infrastructure/persistence/ExpoSecureKeyValueDriver';
@@ -29,6 +35,8 @@ export interface AppDependencies {
   readonly getCloudIncident: GetCloudIncident;
   readonly createCloudIncident: CreateCloudIncident;
   readonly performIncidentAction: PerformIncidentAction;
+  readonly resilientIncidentService: ResilientIncidentActionService;
+  readonly geocodingProvider: GeocodingProviderPort;
   readonly incidentAuthorization: IncidentAuthorization;
   readonly offlineStore: OfflineIncidentStorePort;
   readonly offlineSyncService: OfflineIncidentSyncService;
@@ -47,6 +55,7 @@ export function createAppDependencies(
   offlineStore: OfflineIncidentStorePort = new PersistentIncidentStore(
     new ExpoSecureKeyValueDriver(),
   ),
+  geocodingProvider?: GeocodingProviderPort,
 ): AppDependencies {
   const cloudTransport = new FetchHttpTransport();
   const sessionManager = new SessionManager(cloudTransport, sessionStorage, {
@@ -57,6 +66,16 @@ export function createAppDependencies(
     sessionManager,
   });
   const cloudRepository = new RemoteIncidentRepository(cloudClient);
+  const resolvedGeocodingProvider =
+    geocodingProvider ??
+    new CourseGeocodingClient(cloudTransport, {
+      baseUrl: backendBaseUrl,
+      cache: new InMemoryGeocodingCache(),
+    });
+  const resilientIncidentService = new ResilientIncidentActionService(
+    cloudRepository,
+    resolvedGeocodingProvider,
+  );
   const incidentAuthorization = new IncidentAuthorization();
   const offlineSyncService = new OfflineIncidentSyncService(
     offlineStore,
@@ -76,6 +95,8 @@ export function createAppDependencies(
       incidentAuthorization,
       sessionManager,
     ),
+    resilientIncidentService,
+    geocodingProvider: resolvedGeocodingProvider,
     incidentAuthorization,
     offlineStore,
     offlineSyncService,
