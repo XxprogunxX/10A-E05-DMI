@@ -206,6 +206,7 @@ export default function App() {
           onCreated={(id) => setScreen({ kind: 'detail', id })}
           onBack={() => setScreen({ kind: 'list' })}
           reportTechnicalError={dependencies.reportTechnicalError}
+          resilientIncidentService={dependencies.resilientIncidentService}
         />
       ) : null}
 
