@@ -11,13 +11,16 @@ import {
 
 import type { CreateCloudIncident } from '../../application/incidents/CreateCloudIncident';
 import { CLOUD_INCIDENT_CATEGORIES } from '../../application/incidents/CloudIncidentCategories';
+import type { ResilientIncidentActionService } from '../../application/resilience/ResilientIncidentActionService';
 import type { ReportTechnicalError } from '../../application/telemetry/ReportTechnicalError';
+import type { IncidentLocation } from '../../campusops/contracts';
 
 interface Props {
   readonly createCloudIncident: CreateCloudIncident;
   readonly onCreated: (id: string) => void;
   readonly onBack: () => void;
   readonly reportTechnicalError: ReportTechnicalError;
+  readonly resilientIncidentService?: ResilientIncidentActionService;
 }
 
 function createIdempotencyKey(): string {
@@ -29,18 +32,49 @@ export function CreateIncidentScreen({
   onCreated,
   onBack,
   reportTechnicalError,
+  resilientIncidentService,
 }: Props) {
   const [category, setCategory] =
     useState<(typeof CLOUD_INCIDENT_CATEGORIES)[number]>('maintenance');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
+  const [resolvedLocation, setResolvedLocation] =
+    useState<IncidentLocation | null>(null);
+  const [locationNotice, setLocationNotice] = useState<string | null>(null);
+  const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [state, setState] = useState<'idle' | 'saving' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [idempotencyKey] = useState(createIdempotencyKey);
 
+  const verifyLocationWithProvider = async () => {
+    const manualText = location.trim();
+    if (!manualText || !resilientIncidentService || isResolvingLocation) return;
+
+    setIsResolvingLocation(true);
+    try {
+      const outcome = await resilientIncidentService.resolveIncidentLocation(
+        manualText,
+        manualText,
+      );
+      setResolvedLocation(outcome.location);
+      if (outcome.kind === 'resolved') {
+        setLocation(outcome.location.label);
+        setLocationNotice(
+          `Ubicación verificada por proveedor (${outcome.location.latitude}, ${outcome.location.longitude})`,
+        );
+      } else {
+        setLocationNotice(
+          `Proveedor no disponible (${outcome.reason}): se conserva ubicación manual "${outcome.location.label}"`,
+        );
+      }
+    } finally {
+      setIsResolvingLocation(false);
+    }
+  };
+
   const submit = async () => {
     if (!description.trim() || !location.trim()) {
-      setError('Completa la descripcin y la ubicacin.');
+      setError('Completa la descripción y la ubicación.');
       setState('error');
       return;
     }
@@ -53,7 +87,10 @@ export function CreateIncidentScreen({
         {
           category,
           description: description.trim(),
-          location: location.trim(),
+          location:
+            resolvedLocation?.source === 'provider'
+              ? resolvedLocation.label
+              : location.trim(),
         },
         idempotencyKey,
       );
@@ -74,7 +111,7 @@ export function CreateIncidentScreen({
 
       setError(
         result.error === 'timeout'
-          ? 'El servidor tard demasiado en responder.'
+          ? 'El servidor tardó demasiado en responder.'
           : result.error === 'network'
             ? 'No fue posible comunicarse con el servidor.'
             : 'No fue posible crear la incidencia.',
@@ -101,12 +138,12 @@ export function CreateIncidentScreen({
         onPress={onBack}
         style={styles.backButton}
       >
-        <Text style={styles.backText}>? Cancelar</Text>
+        <Text style={styles.backText}>← Cancelar</Text>
       </Pressable>
 
       <Text style={styles.heading}>Nueva incidencia</Text>
 
-      <Text style={styles.label}>Categora</Text>
+      <Text style={styles.label}>Categoría</Text>
 
       <View style={styles.categories}>
         {CLOUD_INCIDENT_CATEGORIES.map((item) => (
@@ -124,7 +161,7 @@ export function CreateIncidentScreen({
         ))}
       </View>
 
-      <Text style={styles.label}>Descripcin</Text>
+      <Text style={styles.label}>Descripción</Text>
 
       <TextInput
         multiline
@@ -135,15 +172,41 @@ export function CreateIncidentScreen({
         value={description}
       />
 
-      <Text style={styles.label}>Ubicacin</Text>
+      <Text style={styles.label}>Ubicación (proveedor o captura manual)</Text>
 
       <TextInput
-        onChangeText={setLocation}
-        placeholder="Indica la ubicacin"
+        onChangeText={(value) => {
+          setLocation(value);
+          setResolvedLocation(null);
+          setLocationNotice(null);
+        }}
+        placeholder="Escribe edificio, zona o referencia manual"
         style={styles.input}
         testID="incident-location"
         value={location}
       />
+
+      {resilientIncidentService ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={isResolvingLocation}
+          onPress={() => void verifyLocationWithProvider()}
+          style={styles.secondaryButton}
+          testID="lookup-geocoding-location"
+        >
+          {isResolvingLocation ? (
+            <ActivityIndicator />
+          ) : (
+            <Text style={styles.secondaryButtonText}>
+              Verificar ubicación con proveedor
+            </Text>
+          )}
+        </Pressable>
+      ) : null}
+
+      {locationNotice ? (
+        <Text testID="location-resolution-status">{locationNotice}</Text>
+      ) : null}
 
       {state === 'error' && error ? (
         <Text accessibilityRole="alert" style={styles.error}>
@@ -210,6 +273,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minHeight: 44,
     padding: 10,
+  },
+  secondaryButton: {
+    alignItems: 'center',
+    borderColor: '#1555a5',
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 40,
+    paddingHorizontal: 12,
+  },
+  secondaryButtonText: {
+    color: '#1555a5',
+    fontWeight: '700',
   },
   error: {
     textAlign: 'center',

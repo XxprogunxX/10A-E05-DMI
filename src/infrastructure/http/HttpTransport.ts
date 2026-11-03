@@ -9,6 +9,7 @@ export interface HttpRequest {
 export interface HttpResponse {
   readonly status: number;
   readonly body: string;
+  readonly headers?: Readonly<Record<string, string>>;
 }
 
 export interface HttpTransport {
@@ -21,6 +22,19 @@ export class HttpTransportFailure extends Error {
   constructor(readonly kind: 'timeout' | 'network') {
     super(kind);
   }
+}
+
+function extractHeaders(
+  headers: Headers | undefined,
+): Readonly<Record<string, string>> | undefined {
+  if (!headers || typeof headers.forEach !== 'function') {
+    return undefined;
+  }
+  const normalized: Record<string, string> = {};
+  headers.forEach((value, key) => {
+    normalized[key.toLowerCase()] = value;
+  });
+  return normalized;
 }
 
 /** Fetch adapter. Provider errors are reduced to safe transport categories. */
@@ -37,9 +51,11 @@ export class FetchHttpTransport implements HttpTransport {
         signal: controller.signal,
       });
 
+      const responseHeaders = extractHeaders(response.headers);
       return {
         status: response.status,
         body: await response.text(),
+        ...(responseHeaders === undefined ? {} : { headers: responseHeaders }),
       };
     } catch (error: unknown) {
       if (

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "teamId": "10A-E05",
+  "members": [
+    {
+      "name": "Javier",
+      "studentId": "3523110052",
+      "commitShas": ["14d410557ec29a602f6abd4b407afab7d70d25c2"],
+      "files": [
+        "src/domain/resilience/RetryPolicy.ts",
+        "src/domain/location/IncidentLocationSelector.ts",
+        "src/course-evaluation/index.ts",
+        "docs/resilience-policy.md",
+        "course-tests/week-09-resilience-domain.test.ts"
+      ],
+      "tests": [
+        "course-tests/week-09-resilience-domain.test.ts",
+        "course-tests/public/week-09.test.ts"
+      ],
+      "reviews": [
+        "Diseño de planRetry con límite en intento 4, respeto a Retry-After y exigencia de idempotencyKey en POST, validación estricta en selectIncidentLocation sin inventar coordenadas y documentación de política de resiliencia."
+      ],
+      "prediction": "Acotar planRetry a intentos < 4 con backoff exponencial finito y validar en selectIncidentLocation que latitud [-90,90] y longitud [-180,180] sean números finitos debería rechazar POST sin clave estable y degradar a ubicación manual ante cualquier dato incompleto o inválido.",
+      "command": "npm run test:resilience:week9",
+      "observedResult": "Pasaron las 10 pruebas de dominio y públicas de Semana 09: selectIncidentLocation devolvió source='provider' sólo con coordenadas válidas y source='manual' sin coordenadas inventadas ante null, 429, incompletas o latitud 91/999; planRetry respetó retryAfterMs=800, bloqueó intento 4 y exigió clave estable en POST.",
+      "explanation": "Javier implementó las reglas puras de dominio en RetryPolicy.ts e IncidentLocationSelector.ts, conectó los adaptadores evaluables en src/course-evaluation/index.ts, redactó docs/resilience-policy.md y creó las pruebas unitarias de dominio."
+    },
+    {
+      "name": "Francisco Xavier Gil Ginez",
+      "studentId": "3523110137",
+      "commitShas": ["29cc3dfee3faebe7d51ec50df5972388eeb6b238"],
+      "files": [
+        "src/infrastructure/location/GeocodingClient.ts",
+        "src/infrastructure/http/HttpTransport.ts",
+        "course-tests/week-09-geocoding-infrastructure.test.ts"
+      ],
+      "tests": [
+        "course-tests/week-09-geocoding-infrastructure.test.ts"
+      ],
+      "reviews": [
+        "Implementación de InMemoryGeocodingCache con TTL y normalización de llave, CourseGeocodingClient con lectura de Retry-After y registro de intentos, y NominatimGeocodingAdapter con protección ante coordenadas nulas."
+      ],
+      "prediction": "Integrar InMemoryGeocodingCache y planRetry en CourseGeocodingClient debería evitar llamadas de red repetidas para la misma consulta normalizada, esperar 1000ms ante HTTP 429 con Retry-After: 1 y degradar a ubicación manual en el intento 4 sin guardar errores en caché.",
+      "command": "npm run test:resilience:week9",
+      "observedResult": "Pasaron las 5 pruebas de infraestructura de geocodificación (17 pruebas acumuladas con dominio): la segunda consulta se sirvió desde caché (attempts=0), las respuestas incomplete/invalid_coordinates/malformed no se cachearon y los fallos persistentes de timeout se detuvieron en el intento 4 tras esperas [250, 500, 1000].",
+      "explanation": "Francisco implementó la propagación de cabeceras HTTP en HttpTransport.ts, los adaptadores CourseGeocodingClient y NominatimGeocodingAdapter junto con InMemoryGeocodingCache en GeocodingClient.ts, y la suite de pruebas de infraestructura."
+    },
+    {
+      "name": "Hernández Camacho Carlos Eduardo",
+      "studentId": "3515110194",
+      "commitShas": ["ac03fac37207a033ea7475bb964ef32be1165673"],
+      "files": [
+        "src/application/resilience/ResilientIncidentActionService.ts",
+        "src/ui/screens/CreateIncidentScreen.tsx",
+        "src/composition/createAppDependencies.ts",
+        "App.tsx",
+        "course-tests/week-09-integration.test.ts"
+      ],
+      "tests": [
+        "course-tests/week-09-integration.test.ts"
+      ],
+      "reviews": [
+        "Implementación de ResilientIncidentActionService para recuperación de respuesta perdida (timeout_after_commit) con la misma Idempotency-Key y telemetría sanitizada, soporte de alternativa manual en CreateIncidentScreen y pruebas E2E contra course-backend."
+      ],
+      "prediction": "Reintentar resolve y close tras un timeout_after_commit conservando exactamente la misma Idempotency-Key y payload debería recuperar el estado consolidado (duplicate=true) con un único evento en el historial del servidor y permitir crear incidencias con ubicación manual desde la pantalla cuando falla geocodificación.",
+      "command": "npm run test:resilience:week9 && npm run test:sync:week8 && npm run test:session:week6",
+      "observedResult": "Pasaron las 21 pruebas de Semana 09 (incluidas las 4 pruebas E2E contra el backend real y UI), 20 de Semana 08 y 26 de Semana 06: resolve y close se recuperaron en 2 intentos con duplicate=true y 1 sola entrada en history, la telemetría redactó campos sensibles y CreateIncidentScreen guardó la ubicación manual.",
+      "explanation": "Carlos implementó ResilientIncidentActionService, integró la verificación de ubicación con alternativa manual en CreateIncidentScreen y createAppDependencies, y construyó las pruebas extremo a extremo de respuesta perdida y degradación manual."
+    }
+  ]
+}

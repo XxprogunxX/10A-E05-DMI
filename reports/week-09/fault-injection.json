@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "b1852d7d05b0e60fe91d3346e9aedd77eb3917d4",
+  "generatedAt": "2026-11-02T23:56:00.000Z",
+  "faultScenarios": {
+    "lostResponseAfterCommit": {
+      "incidentId": "campus-inc-001",
+      "operations": [
+        {
+          "action": "resolve",
+          "actorId": "technician-1",
+          "idempotencyKey": "resolve-campus-inc-001-op-1",
+          "attempt1Scenario": "timeout_after_commit",
+          "attempt1Outcome": "timeout",
+          "attempt2Scenario": "success",
+          "attempt2HttpStatus": 200,
+          "duplicate": true,
+          "resultingStatus": "resolved",
+          "resultingVersion": 3,
+          "serverHistoryEntriesForOperation": 1
+        },
+        {
+          "action": "close",
+          "actorId": "coordinator-1",
+          "idempotencyKey": "close-campus-inc-001-lost-response",
+          "attempt1Scenario": "timeout_after_commit",
+          "attempt1Outcome": "timeout",
+          "attempt2Scenario": "success",
+          "attempt2HttpStatus": 200,
+          "duplicate": true,
+          "resultingStatus": "closed",
+          "resultingVersion": 4,
+          "serverHistoryEntriesForOperation": 1
+        }
+      ]
+    },
+    "geocodingFaults": [
+      {
+        "scenario": "incomplete",
+        "providerPayload": { "label": "Zona ficticia" },
+        "campusOpsResponse": {
+          "source": "manual",
+          "label": "Zona incomplete — Manual"
+        },
+        "inventedCoordinates": false
+      },
+      {
+        "scenario": "invalid_coordinates",
+        "providerPayload": {
+          "label": "Zona ficticia",
+          "latitude": 999,
+          "longitude": null
+        },
+        "campusOpsResponse": {
+          "source": "manual",
+          "label": "Zona invalid_coordinates — Manual"
+        },
+        "inventedCoordinates": false
+      },
+      {
+        "scenario": "malformed",
+        "providerPayload": "{\"items\": [}",
+        "campusOpsResponse": {
+          "source": "manual",
+          "label": "Zona malformed — Manual"
+        },
+        "inventedCoordinates": false
+      },
+      {
+        "scenario": "rate_limited",
+        "httpStatus": 429,
+        "retryAfterHeaderSeconds": 1,
+        "attemptsExecuted": 4,
+        "campusOpsResponse": {
+          "source": "manual",
+          "label": "Zona limitada — Manual"
+        },
+        "inventedCoordinates": false
+      },
+      {
+        "scenario": "server_error",
+        "httpStatus": 500,
+        "attemptsExecuted": 4,
+        "campusOpsResponse": {
+          "source": "manual",
+          "label": "Edificio D — Planta Baja Manual"
+        },
+        "incidentCreatedWithManualFallback": true
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "lost-response-timeout-after-commit-resolve-and-close",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Contra course-backend/server.mjs con X-Course-Scenario='timeout_after_commit' y timeout de cliente de 250ms, el intento 1 de resolve (resolve-campus-inc-001-op-1) y close (close-campus-inc-001-lost-response) abortó por timeout después de que el servidor guardó el cambio; el intento 2 reenvió la misma Idempotency-Key y cuerpo tras 250ms, recibió HTTP 200 con duplicate=true (version=3 resolved y version=4 closed) y comprobó en GET /v1/incidents/campus-inc-001 que payload.history contiene exactamente 1 registro para resolve y 1 para close."
+    },
+    {
+      "id": "geocoding-invalid-incomplete-and-malformed-fallback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Ante respuestas del proveedor con coordenadas fuera de rango (latitude=999, longitude=null, latitude=91), objetos incompletos ({ label: 'Zona ficticia' }) o JSON truncado ('{\"items\": [}'), selectIncidentLocation y CourseGeocodingClient devolvieron { source: 'manual', label: manualLabel } sin propiedades latitude/longitude y sin contaminar InMemoryGeocodingCache."
+    },
+    {
+      "id": "geocoding-429-retry-after-and-timeout-exhaustion",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Ante HTTP 429 con cabecera Retry-After: 1, CourseGeocodingClient respetó la espera de 1000ms antes de reintentar; cuando la falla persistió hasta el intento 4 (tanto en 429 como en timeout/500), planRetry devolvió retry=false en el intento 4 y la aplicación degradó a ubicación manual permitiendo crear la incidencia con 'Edificio D — Planta Baja Manual'."
+    },
+    {
+      "id": "ui-manual-location-capture-when-provider-fails",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:resilience:week9",
+      "evidence": "En CreateIncidentScreen, al fallar el proveedor de geocodificación tras pulsar lookup-geocoding-location, la pantalla mostró el aviso de respaldo manual, conservó 'Edificio H — Aula 204 (Referencia Manual)' en incident-location y registró la incidencia en el backend con esa ubicación manual."
+    },
+    {
+      "id": "post-without-idempotency-key-rejected-without-retry",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:resilience:week9",
+      "evidence": "planRetry({ method: 'POST', status: 503, attempt: 1 }) devolvió { retry: false, delayMs: 0, requiresStableIdempotencyKey: true }, y ResilientIncidentActionService rechazó escrituras con clave vacía sin invocar el repositorio remoto."
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "b1852d7d05b0e60fe91d3346e9aedd77eb3917d4",
+  "generatedAt": "2026-11-02T23:56:00.000Z",
+  "retryPolicyLimits": {
+    "maxAttempts": 4,
+    "maxRetries": 3,
+    "baseDelayMs": 250,
+    "maxDelayMs": 8000,
+    "postRequiresStableIdempotencyKey": true
+  },
+  "observedRetryMetrics": [
+    {
+      "flow": "incident-close-lost-response-recovery",
+      "method": "POST",
+      "incidentId": "campus-inc-001",
+      "correlationId": "close-campus-inc-001-lost-response",
+      "attemptsCount": 2,
+      "duplicateEffectObserved": false,
+      "serverDuplicateFlag": true,
+      "historyEntriesForOperation": 1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "timeout",
+          "delayMs": 250,
+          "retried": true
+        },
+        {
+          "attempt": 2,
+          "status": 200,
+          "delayMs": 0,
+          "retried": false
+        }
+      ],
+      "sanitizedTelemetry": {
+        "incidentId": "campus-inc-001",
+        "correlationId": "close-campus-inc-001-lost-response",
+        "status": 200,
+        "attempt": 2,
+        "location": "[REDACTED]",
+        "assignedTechnicianId": "[REDACTED]",
+        "reporterId": "[REDACTED]",
+        "evidence": "[REDACTED]"
+      }
+    },
+    {
+      "flow": "geocoding-rate-limited-429-bounded",
+      "method": "GET",
+      "correlationId": "geocoding-rate-limited-001",
+      "attemptsCount": 4,
+      "retryAfterMsHonored": 1000,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": 429,
+          "delayMs": 1000,
+          "retried": true
+        },
+        {
+          "attempt": 2,
+          "status": 429,
+          "delayMs": 1000,
+          "retried": true
+        },
+        {
+          "attempt": 3,
+          "status": 429,
+          "delayMs": 1000,
+          "retried": true
+        },
+        {
+          "attempt": 4,
+          "status": 429,
+          "delayMs": 0,
+          "retried": false
+        }
+      ]
+    },
+    {
+      "flow": "geocoding-persistent-timeout-progressive-backoff",
+      "method": "GET",
+      "correlationId": "geocoding-timeout-backoff-001",
+      "attemptsCount": 4,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "timeout",
+          "delayMs": 250,
+          "retried": true
+        },
+        {
+          "attempt": 2,
+          "status": "timeout",
+          "delayMs": 500,
+          "retried": true
+        },
+        {
+          "attempt": 3,
+          "status": "timeout",
+          "delayMs": 1000,
+          "retried": true
+        },
+        {
+          "attempt": 4,
+          "status": "timeout",
+          "delayMs": 0,
+          "retried": false
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "id": "progressive-backoff-and-hard-stop-at-attempt-4",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Las observaciones de reintento registraron demoras finitas y estrictamente progresivas de [250ms, 500ms, 1000ms] en los intentos 1, 2 y 3, y detuvieron la ejecución en el intento 4 con { attempt: 4, delayMs: 0, retried: false }, evitando bucles infinitos."
+    },
+    {
+      "id": "retry-after-header-honored-on-http-429",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Tanto en planRetry({ method: 'GET', status: 429, attempt: 1, retryAfterMs: 800 }) (delayMs=800) como contra el backend controlado con cabecera 'retry-after: 1' (delayMs=1000), las esperas observadas respetaron el tiempo indicado por el servidor y se acotaron a maxDelayMs."
+    },
+    {
+      "id": "idempotent-replay-metrics-and-zero-duplicate-side-effects",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Tras perder la respuesta en timeout_after_commit, el segundo intento reutilizó la clave estable 'close-campus-inc-001-lost-response', completó en 2 intentos con status=200 y duplicate=true, registró telemetría con location/reporterId/assignedTechnicianId/evidence en '[REDACTED]' y mantuvo una sola entrada de cierre en el historial del servidor."
+    },
+    {
+      "id": "cache-hit-eliminates-redundant-geocoding-requests",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test:resilience:week9",
+      "evidence": "Tras una primera resolución exitosa (attempts=1, fromCache=false), la consulta normalizada subsecuente ('  edificio   a ') se resolvió desde InMemoryGeocodingCache con attempts=0 y fromCache=true sin realizar nuevas solicitudes HTTP hasta expirar el TTL."
+    }
+  ]
+}
