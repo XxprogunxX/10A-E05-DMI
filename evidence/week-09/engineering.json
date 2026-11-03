@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "b1852d7d05b0e60fe91d3346e9aedd77eb3917d4",
+  "decision": "Implementar una arquitectura de integración resiliente en tres niveles: (1) reintentar únicamente fallos transitorios (timeout, red, HTTP 408, 429 y 500..504) con límite duro en el intento 4 (máximo 3 reintentos, demoras progresivas finitas de 250ms, 500ms y 1000ms o respeto explícito a Retry-After acotado a maxDelayMs=8000ms), exigiendo una Idempotency-Key estable no vacía para cualquier POST de modo que una respuesta perdida tras guardar (timeout_after_commit en resolve o close) se recupere con duplicate=true sin duplicar historial, evidencias ni notas; (2) continuar con la alternativa manual (selectIncidentLocation -> { source: 'manual', label: manualLabel }, sin inventar coordenadas) y caché en memoria por consulta normalizada cuando el proveedor de geocodificación devuelve datos incompletos, coordenadas inválidas (como latitude=999 o null), JSON malformado o agota sus reintentos; y (3) informar fallo inmediato sin reintentar ante rechazos deterministas (HTTP 400, 401, 403, 404, 409, 422), POST sin clave de idempotencia estable o agotamiento del intento 4 en operaciones de escritura.",
+  "alternatives": [
+    "Reintentar indefinidamente todas las solicitudes fallidas con intervalo fijo sin distinguir método HTTP ni requerir clave de idempotencia. Se descartó porque saturaría al proveedor ante un 429 o caída prolongada, bloquearía la interfaz y duplicaría incidencias o cierres cuando se pierde la respuesta de un POST.",
+    "Bloquear la creación de incidencias cuando el servicio de geocodificación falla o rellenar coordenadas por defecto (0, 0) cuando faltan latitud o longitud. Se descartó porque impediría reportar incidencias durante caídas externas y contaminaría el dominio con ubicaciones falsas en el Golfo de Guinea.",
+    "Tratar cualquier timeout en una escritura POST como si el servidor no hubiera ejecutado la acción y generar una nueva Idempotency-Key en cada reintento. Se descartó porque ante timeout_after_commit el servidor ya aplicó el cambio, y cambiar la clave provocaría errores 409 de transición o duplicaría eventos en el historial."
+  ],
+  "tradeoff": "Exigir claves de idempotencia estables por operación, mantener una caché con TTL normalizado y aplicar backoff progresivo con tope en el intento 4 añade estado de coordinación en aplicación e infraestructura y una breve latencia controlada durante fallos transitorios. A cambio, elimina el riesgo de bucles infinitos o tormentas de solicitudes, garantiza cero efectos duplicados cuando se pierde una respuesta tras guardar y mantiene a CampusOps 100% operativo mediante captura manual de ubicación cuando el proveedor externo falla.",
+  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+  "aiAssistance": "Se empleó asistencia de IA para estructurar las pruebas de inyección de fallas contra el backend controlado (timeout_after_commit y Retry-After) y validar la cobertura de los contratos de Semana 09. Los tres integrantes revisaron y ejecutaron las pruebas en sus respectivas ramas.",
+  "verification": [
+    {
+      "command": "make feedback",
+      "result": "PASS",
+      "evidence": "Pasaron typecheck, lint, test:smoke, audit:ci (0 vulnerabilidades críticas) y bundle:release de Expo Android."
+    },
+    {
+      "command": "make verify-week-09",
+      "result": "PASS",
+      "evidence": "El evaluador oficial verificó base_files, react_native_profile, toolchain_scripts, workflow_integrity, secret_scan, typecheck, lint, audit:ci, test:smoke y backend:self-test con estado PASS."
+    },
+    {
+      "command": "npm run test:resilience:week9 && npm run test:sync:week8 && npm run test:session:week6",
+      "result": "PASS",
+      "evidence": "Pasaron las 4 suites y 21 pruebas de Semana 09 (dominio de resiliencia, infraestructura de geocodificación/caché, integración E2E con timeout_after_commit/UI manual y pruebas públicas), además de las 20 pruebas de Semana 08 y 26 pruebas de Semana 06."
+    },
+    {
+      "command": "make public-test-week-09",
+      "result": "PASS",
+      "evidence": "El evaluador oficial validó docs/resilience-policy.md, reports/week-09/fault-injection.json, reports/week-09/retry-metrics.json, evidence/week-09/engineering.json, evidence/week-09/individual.json y course-tests/public/week-09.test.ts."
+    }
+  ]
+}
